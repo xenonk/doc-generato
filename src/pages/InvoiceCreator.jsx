@@ -53,7 +53,7 @@ const VersionHistoryItem = ({ version, isCurrent, onClick, isCollapsed }) => {
 };
 
 // Document Workspace Component
-const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange }) => {
+const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange, isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef(null);
@@ -100,6 +100,79 @@ const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (isCollapsed) {
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div 
+          onMouseEnter={() => setIsOpen(true)}
+          className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+          title="Workspaces"
+        >
+          <Building2 className="w-5 h-5 text-gray-500" />
+        </div>
+        {isOpen && (
+          <div 
+            onMouseLeave={() => setIsOpen(false)}
+            className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+          >
+            <div className="p-2 border-b border-gray-200">
+              <div className="relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search workspaces..."
+                  className="w-full pl-8 pr-4 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            <div className="p-2">
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedWorkspaces.map(workspace => (
+                  <div
+                    key={workspace.id}
+                    className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm"
+                  >
+                    <span>{workspace.name}</span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onWorkspaceChange(selectedWorkspaces.filter(w => w.id !== workspace.id));
+                      }}
+                      className="hover:text-blue-900"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="max-h-48 overflow-y-auto">
+                {filteredWorkspaces.map(workspace => (
+                  <div
+                    key={workspace.id}
+                    onClick={() => handleWorkspaceToggle(workspace)}
+                    className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 ${
+                      selectedWorkspaces.some(w => w.id === workspace.id) ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-700">{workspace.name}</span>
+                      <span className="text-xs text-gray-500">({workspace.documents})</span>
+                    </div>
+                    {selectedWorkspaces.some(w => w.id === workspace.id) && (
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="mb-6">
@@ -200,21 +273,29 @@ const InvoiceSidebarContent = ({
     <div className="flex flex-col h-full">
       <div className={`p-6 flex-1 transition-all duration-300 ${isCollapsed ? 'px-3' : ''}`}>
         {/* Import Data */}
-        <div className={`mb-6 ${isCollapsed ? 'hidden' : ''}`}>
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-            <p className="text-sm text-gray-600">Drop XLSX file here or</p>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
-            <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls</p>
+        <div className={`mb-6 ${isCollapsed ? '' : ''}`}>
+          {!isCollapsed && <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>}
+          <div className={`border-2 border-dashed border-gray-300 rounded-lg ${isCollapsed ? 'p-2' : 'p-6'} text-center`}>
+            {isCollapsed ? (
+              <Upload className="w-5 h-5 mx-auto text-gray-400" />
+            ) : (
+              <>
+                <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-600">Drop XLSX file here or</p>
+                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
+                <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls</p>
+              </>
+            )}
           </div>
         </div>
 
         {/* Document Workspace */}
-        <div className={isCollapsed ? 'hidden' : ''}>
+        <div className={isCollapsed ? '' : 'mb-6'}>
+          {!isCollapsed && <h3 className="text-sm font-medium text-gray-900 mb-3">Document Workspace</h3>}
           <DocumentWorkspace 
             selectedWorkspaces={selectedWorkspaces}
             onWorkspaceChange={setSelectedWorkspaces}
+            isCollapsed={isCollapsed}
           />
         </div>
 
