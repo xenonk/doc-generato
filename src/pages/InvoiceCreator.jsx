@@ -534,11 +534,17 @@ const RightSidebar = ({
   isCollapsed,
   onToggle
 }) => {
+  const formatTime = (date) => {
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   return (
     <div className="relative">
       {/* Sidebar */}
       <aside 
-        className={`bg-white border-l border-gray-200 h-full transition-all duration-300 ${
+        className={`bg-white border-l border-gray-200 h-full transition-all duration-300 overflow-hidden ${
           isCollapsed ? 'w-10' : 'w-40'
         }`}
       >
@@ -642,9 +648,19 @@ const RightSidebar = ({
             </div>
           </div>
           <div className={`border-t border-gray-200 p-4 ${isCollapsed ? 'px-2' : ''}`}>
-            <div className="text-xs text-gray-500">
-              {!isCollapsed && "Last saved: "}
-              {new Date().toLocaleTimeString()}
+            <div className={`text-xs text-gray-500 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+              {!isCollapsed ? (
+                <>
+                  <span>Last saved: </span>
+                  <span>{new Date().toLocaleTimeString()}</span>
+                </>
+              ) : (
+                <div className="flex flex-col items-center space-y-1">
+                  <span className="text-[10px]">Last</span>
+                  <span className="text-[10px]">saved</span>
+                  <span className="text-[10px]">{formatTime(new Date())}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
