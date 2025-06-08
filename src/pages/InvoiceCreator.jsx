@@ -85,9 +85,9 @@ const InvoiceForm = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="space-y-6">
       {/* Invoice Header Block */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">INVOICE</h1>
@@ -148,7 +148,7 @@ const InvoiceForm = ({
               type="text"
               value={invoice.number}
               onChange={(e) => onFieldChange('number', e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 font-medium"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
             />
           </div>
           <div>
@@ -164,120 +164,124 @@ const InvoiceForm = ({
       </div>
 
       {/* Contract Selection */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Contract</label>
-        <div className="relative">
-          <select
-            value={selectedContract}
-            onChange={(e) => handleContractSelect(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 appearance-none bg-white"
-          >
-            <option value="">Select Contract</option>
-            {contracts.map(contract => (
-              <option key={contract.id} value={contract.id}>
-                {contract.name}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Contract</label>
+          <div className="relative">
+            <select
+              value={selectedContract}
+              onChange={(e) => handleContractSelect(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 appearance-none bg-white"
+            >
+              <option value="">Select Contract</option>
+              {contracts.map(contract => (
+                <option key={contract.id} value={contract.id}>
+                  {contract.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+          </div>
         </div>
       </div>
 
       {/* From/To Section */}
-      <div className="grid grid-cols-2 gap-8 mb-6">
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">From (Seller)</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-              <select
-                value={invoice.seller?.company || ''}
-                onChange={(e) => onCompanyChange('seller', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="">Select Company</option>
-                {companies.map(company => (
-                  <option key={company.id} value={company.id}>
-                    {company.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-              <textarea
-                value={invoice.seller?.address || ''}
-                onChange={(e) => onFieldChange('seller.address', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="grid grid-cols-2 gap-8">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">From (Seller)</h3>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Director</label>
-                <input
-                  type="text"
-                  value={invoice.seller?.director || ''}
-                  onChange={(e) => onFieldChange('seller.director', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                <select
+                  value={invoice.seller?.company || ''}
+                  onChange={(e) => onCompanyChange('seller', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                />
+                >
+                  <option value="">Select Company</option>
+                  {companies.map(company => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={invoice.seller?.email || ''}
-                  onChange={(e) => onFieldChange('seller.email', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <textarea
+                  value={invoice.seller?.address || ''}
+                  onChange={(e) => onFieldChange('seller.address', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Director</label>
+                  <input
+                    type="text"
+                    value={invoice.seller?.director || ''}
+                    onChange={(e) => onFieldChange('seller.director', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={invoice.seller?.email || ''}
+                    onChange={(e) => onFieldChange('seller.email', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">To (Buyer)</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-              <select
-                value={invoice.buyer?.company || ''}
-                onChange={(e) => onCompanyChange('buyer', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="">Select Company</option>
-                {companies.map(company => (
-                  <option key={company.id} value={company.id}>
-                    {company.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-              <textarea
-                value={invoice.buyer?.address || ''}
-                onChange={(e) => onFieldChange('buyer.address', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">To (Buyer)</h3>
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
-                <input
-                  type="text"
-                  value={invoice.buyer?.contactPerson || ''}
-                  onChange={(e) => onFieldChange('buyer.contactPerson', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                <select
+                  value={invoice.buyer?.company || ''}
+                  onChange={(e) => onCompanyChange('buyer', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                />
+                >
+                  <option value="">Select Company</option>
+                  {companies.map(company => (
+                    <option key={company.id} value={company.id}>
+                      {company.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={invoice.buyer?.email || ''}
-                  onChange={(e) => onFieldChange('buyer.email', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <textarea
+                  value={invoice.buyer?.address || ''}
+                  onChange={(e) => onFieldChange('buyer.address', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                  <input
+                    type="text"
+                    value={invoice.buyer?.contactPerson || ''}
+                    onChange={(e) => onFieldChange('buyer.contactPerson', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={invoice.buyer?.email || ''}
+                    onChange={(e) => onFieldChange('buyer.email', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -285,18 +289,17 @@ const InvoiceForm = ({
       </div>
 
       {/* Bank Details */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Bank Details</label>
-        <select
-          value={invoice.bankDetails || ''}
-          onChange={(e) => onFieldChange('bankDetails', e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-        >
-          <option value="">Select Bank Account</option>
-          <option value="Chase Bank - Account: ****1234">Chase Bank - Account: ****1234</option>
-          <option value="Bank of America - Account: ****5678">Bank of America - Account: ****5678</option>
-          <option value="Wells Fargo - Account: ****9012">Wells Fargo - Account: ****9012</option>
-        </select>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Bank Details</h3>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Bank Information</label>
+          <textarea
+            value={invoice.bankDetails}
+            onChange={(e) => onFieldChange('bankDetails', e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
+            placeholder="Enter bank account details..."
+          />
+        </div>
       </div>
 
       {/* Invoice Items */}
