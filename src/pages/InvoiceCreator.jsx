@@ -50,7 +50,6 @@ const VersionHistoryItem = ({ version, isCurrent, onClick }) => {
 
 // Invoice Sidebar Content Component
 const InvoiceSidebarContent = ({ 
-  onSaveAsDraft, 
   versions = [], 
   currentVersion,
   onVersionSelect,
@@ -111,18 +110,6 @@ const InvoiceSidebarContent = ({
           ))}
         </div>
       </div>
-
-      {/* Save as Draft */}
-      <button
-        onClick={onSaveAsDraft}
-        className={`w-full px-4 py-2 text-sm rounded-lg border ${
-          hasUnsavedChanges 
-            ? 'text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100' 
-            : 'text-gray-600 border-gray-200 hover:bg-gray-100'
-        }`}
-      >
-        {hasUnsavedChanges ? 'Save Changes' : 'Save as Draft'}
-      </button>
     </div>
   );
 };
@@ -138,10 +125,12 @@ const InvoiceForm = ({
   onAddItem,
   onUpdateItem,
   onRemoveItem,
+  onSave,
   isSaving
 }) => {
   const [selectedContract, setSelectedContract] = useState('');
   const [showGenerateDropdown, setShowGenerateDropdown] = useState(false);
+  const [showSaveDropdown, setShowSaveDropdown] = useState(false);
 
   const handleContractSelect = (contractId) => {
     setSelectedContract(contractId);
@@ -195,12 +184,42 @@ const InvoiceForm = ({
                 </div>
               )}
             </div>
-            <button
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              disabled={isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save'}
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowSaveDropdown(!showSaveDropdown)}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700"
+                disabled={isSaving}
+              >
+                <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showSaveDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="py-1">
+                    <button 
+                      onClick={() => {
+                        onSave('final');
+                        setShowSaveDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Save as Final</span>
+                    </button>
+                    <button 
+                      onClick={() => {
+                        onSave('draft');
+                        setShowSaveDropdown(false);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                    >
+                      <FileText className="w-4 h-4" />
+                      <span>Save as Draft</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -720,29 +739,19 @@ export default function InvoiceCreator() {
     }
   );
 
-  // Save current state when saving
-  const handleSave = async () => {
+  // Update save handler to handle both draft and final saves
+  const handleSave = async (type) => {
     try {
       const mutation = isEditing ? updateMutation : createMutation;
-      await mutation.mutateAsync(invoice);
+      await mutation.mutateAsync({ ...invoice, status: type });
       setLastSavedState(JSON.parse(JSON.stringify(invoice)));
       setHasUnsavedChanges(false);
-      toast.success('Invoice saved successfully');
+      toast.success(`Invoice saved as ${type}`);
+      if (type === 'final') {
+        navigate('/dashboard');
+      }
     } catch (error) {
       toast.error(`Failed to save invoice: ${error.message}`);
-    }
-  };
-
-  // Handle save as draft
-  const handleSaveAsDraft = async () => {
-    try {
-      const mutation = isEditing ? updateMutation : createMutation;
-      await mutation.mutateAsync({ ...invoice, status: 'draft' });
-      setLastSavedState(JSON.parse(JSON.stringify(invoice)));
-      setHasUnsavedChanges(false);
-      toast.success('Invoice saved as draft');
-    } catch (error) {
-      toast.error(`Failed to save draft: ${error.message}`);
     }
   };
 
@@ -773,7 +782,7 @@ export default function InvoiceCreator() {
 
   const handleWarningDialogSaveAndGo = async () => {
     try {
-      await handleSave();
+      await handleSave('final');
       restoreVersion(selectedVersion);
       setShowWarningDialog(false);
       setSelectedVersion(null);
@@ -912,7 +921,6 @@ export default function InvoiceCreator() {
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         >
           <InvoiceSidebarContent 
-            onSaveAsDraft={handleSaveAsDraft}
             versions={versions}
             currentVersion={lastSavedState}
             onVersionSelect={handleVersionSelect}
@@ -947,6 +955,7 @@ export default function InvoiceCreator() {
                   onAddItem={addItem}
                   onUpdateItem={updateItem}
                   onRemoveItem={removeItem}
+                  onSave={handleSave}
                   isSaving={isCreating || isUpdating}
                 />
               </div>
