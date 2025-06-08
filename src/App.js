@@ -10,6 +10,7 @@ import DocumentSets from './pages/DocumentSets';
 import Templates from './pages/Templates';
 import Analytics from './pages/Analytics';
 import InvoiceCreator from './pages/InvoiceCreator';
+import ContractCreator from './pages/ContractCreator';
 import Login from './pages/Login';
 import HandbookRoutes from './routes/handbookRoutes';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -96,6 +97,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <InvoiceCreator />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contract/create"
+                element={
+                  <ProtectedRoute>
+                    <ContractCreator />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contract/:id/edit"
+                element={
+                  <ProtectedRoute>
+                    <ContractCreator />
                   </ProtectedRoute>
                 }
               />
