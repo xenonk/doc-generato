@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DocumentSidebarContent from './DocumentSidebarContent';
+import DocumentSidebarContent from './DocumentLeftSidebar';
 import DocumentRightSidebar from './DocumentRightSidebar';
 import BaseSidebar from './BaseSidebar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';

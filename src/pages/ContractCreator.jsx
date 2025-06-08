@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import Header from '../components/Header';
 import BaseSidebar from '../components/common/BaseSidebar';
-import DocumentSidebarContent from '../components/common/DocumentSidebarContent';
+import DocumentSidebarContent from '../components/common/DocumentLeftSidebar';
 import DocumentRightSidebar from '../components/common/DocumentRightSidebar';
 import DocumentFormWrapper from '../components/common/DocumentFormWrapper';
 
