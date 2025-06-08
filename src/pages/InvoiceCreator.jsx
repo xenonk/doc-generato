@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { 
   ChevronDown, Upload, Plus, Trash2, FileText, 
   Download, FileJson, FileSpreadsheet, Settings, Moon, LogOut, User, Building2, Mail, History,
-  Search, X, CheckCircle2, AlertCircle, Save, XCircle
+  Search, X, CheckCircle2, AlertCircle, Save, XCircle, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
@@ -530,95 +530,137 @@ const RightSidebar = ({
   showExportDropdown,
   onExportDropdownToggle,
   showSaveDropdown,
-  onSaveDropdownToggle
+  onSaveDropdownToggle,
+  isCollapsed,
+  onToggle
 }) => {
   return (
-    <div className="w-40 bg-white border-l border-gray-200 h-full flex flex-col">
-      <div className="p-4 space-y-4 flex-1">
-        <h3 className="text-sm font-medium text-gray-900">Actions</h3>
-        <div className="space-y-3">
-          <button
-            onClick={onPreview}
-            className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center space-x-2"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Preview</span>
-          </button>
-          <div className="relative">
-            <button
-              onClick={onExportDropdownToggle}
-              className="w-full bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-green-700"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {showExportDropdown && (
-              <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <div className="py-1">
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                    <FileText className="w-4 h-4" />
-                    <span>Generate PDF</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                    <FileText className="w-4 h-4" />
-                    <span>Generate DOCX</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                    <FileJson className="w-4 h-4" />
-                    <span>Export JSON</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                    <FileSpreadsheet className="w-4 h-4" />
-                    <span>Export XLSX</span>
-                  </button>
-                </div>
+    <div className="relative">
+      {/* Sidebar */}
+      <aside 
+        className={`bg-white border-l border-gray-200 h-full transition-all duration-300 ${
+          isCollapsed ? 'w-10' : 'w-40'
+        }`}
+      >
+        <div className="flex flex-col h-full">
+          <div className={`p-4 space-y-4 flex-1 ${isCollapsed ? 'px-2' : ''}`}>
+            {!isCollapsed && <h3 className="text-sm font-medium text-gray-900">Actions</h3>}
+            <div className="space-y-3">
+              {/* Preview Button */}
+              <button
+                onClick={onPreview}
+                className={`w-full ${isCollapsed ? 'p-2' : 'px-4 py-2'} text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center space-x-2`}
+                title={isCollapsed ? "Preview" : undefined}
+              >
+                <FileText className="w-4 h-4" />
+                {!isCollapsed && <span>Preview</span>}
+              </button>
+
+              {/* Export Button */}
+              <div className="relative">
+                <button
+                  onClick={onExportDropdownToggle}
+                  className={`w-full bg-green-600 text-white ${isCollapsed ? 'p-2' : 'px-4 py-2'} rounded-lg flex items-center justify-center space-x-2 hover:bg-green-700`}
+                  title={isCollapsed ? "Export" : undefined}
+                >
+                  <Download className="w-4 h-4" />
+                  {!isCollapsed && (
+                    <>
+                      <span>Export</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+                {showExportDropdown && (
+                  <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-0 mt-2'} w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10`}>
+                    <div className="py-1">
+                      <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                        <FileText className="w-4 h-4" />
+                        <span>Generate PDF</span>
+                      </button>
+                      <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                        <FileText className="w-4 h-4" />
+                        <span>Generate DOCX</span>
+                      </button>
+                      <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                        <FileJson className="w-4 h-4" />
+                        <span>Export JSON</span>
+                      </button>
+                      <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>Export XLSX</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Save Button */}
+              <div className="relative">
+                <button
+                  onClick={onSaveDropdownToggle}
+                  className={`w-full bg-blue-600 text-white ${isCollapsed ? 'p-2' : 'px-4 py-2'} rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700`}
+                  disabled={isSaving}
+                  title={isCollapsed ? (isSaving ? "Saving..." : "Save") : undefined}
+                >
+                  {isCollapsed ? (
+                    <Save className="w-4 h-4" />
+                  ) : (
+                    <>
+                      <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                      <ChevronDown className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+                {showSaveDropdown && (
+                  <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-0 mt-2'} w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10`}>
+                    <div className="py-1">
+                      <button 
+                        onClick={() => {
+                          onSave('final');
+                          onSaveDropdownToggle();
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Save as Final</span>
+                      </button>
+                      <button 
+                        onClick={() => {
+                          onSave('draft');
+                          onSaveDropdownToggle();
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Save as Draft</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-          <div className="relative">
-            <button
-              onClick={onSaveDropdownToggle}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700"
-              disabled={isSaving}
-            >
-              <span>{isSaving ? 'Saving...' : 'Save'}</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {showSaveDropdown && (
-              <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <div className="py-1">
-                  <button 
-                    onClick={() => {
-                      onSave('final');
-                      onSaveDropdownToggle();
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    <span>Save as Final</span>
-                  </button>
-                  <button 
-                    onClick={() => {
-                      onSave('draft');
-                      onSaveDropdownToggle();
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                  >
-                    <FileText className="w-4 h-4" />
-                    <span>Save as Draft</span>
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className={`border-t border-gray-200 p-4 ${isCollapsed ? 'px-2' : ''}`}>
+            <div className="text-xs text-gray-500">
+              {!isCollapsed && "Last saved: "}
+              {new Date().toLocaleTimeString()}
+            </div>
           </div>
         </div>
-      </div>
-      <div className="border-t border-gray-200 p-4">
-        <div className="text-xs text-gray-500">
-          Last saved: {new Date().toLocaleTimeString()}
-        </div>
-      </div>
+      </aside>
+
+      {/* Sidebar Toggle Button */}
+      <button
+        onClick={onToggle}
+        className="absolute -left-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm z-10"
+      >
+        {isCollapsed ? (
+          <ChevronRight className="w-3.5 h-3.5" />
+        ) : (
+          <ChevronLeft className="w-3.5 h-3.5" />
+        )}
+      </button>
     </div>
   );
 };
@@ -1094,6 +1136,7 @@ export default function InvoiceCreator() {
   const [lastSavedState, setLastSavedState] = useState(null);
   const [showGenerateDropdown, setShowGenerateDropdown] = useState(false);
   const [showSaveDropdown, setShowSaveDropdown] = useState(false);
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
 
   const [invoice, setInvoice] = useState({
     number: 'INV-2024-001',
@@ -1391,7 +1434,7 @@ export default function InvoiceCreator() {
         
         <div className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : ''}`}>
           <div className="flex h-full">
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className={`flex-1 p-6 overflow-y-auto transition-all duration-300 ${isRightSidebarCollapsed ? 'mr-10' : 'mr-40'}`}>
               {error ? (
                 <div className="text-center">
                   <div className="text-red-600 text-xl mb-4">
@@ -1434,6 +1477,8 @@ export default function InvoiceCreator() {
               onExportDropdownToggle={() => setShowGenerateDropdown(!showGenerateDropdown)}
               showSaveDropdown={showSaveDropdown}
               onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+              isCollapsed={isRightSidebarCollapsed}
+              onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
             />
           </div>
         </div>
