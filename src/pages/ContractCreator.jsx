@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { documentService } from '../services/documentService';
+import DocumentLayout from '../components/common/DocumentLayout';
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import { 
   FileText, Building2, Calendar, DollarSign, 
   User, Mail, Phone, Globe, FileSignature,
   ChevronLeft, Save, X, AlertCircle
 } from 'lucide-react';
-import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
 
 // Mock data for companies
 const mockCompanies = [
@@ -47,10 +48,16 @@ const paymentTerms = [
 const ContractCreator = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errors, setErrors] = useState({});
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [document, setDocument] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [versions, setVersions] = useState([]);
+  const [collaborators, setCollaborators] = useState([]);
+  const [workspaces, setWorkspaces] = useState([]);
+  const [selectedWorkspace, setSelectedWorkspace] = useState(null);
+  const [currentVersion, setCurrentVersion] = useState(null);
   const [formData, setFormData] = useState({
     contractNumber: '',
     contractType: '',
@@ -88,100 +95,122 @@ const ContractCreator = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      // In a real app, this would fetch the contract data
-      // For now, we'll use mock data
-      const mockContract = {
-        contractNumber: 'CNT-2024-001',
-        contractType: 'service',
-        title: 'Software Development Agreement',
-        description: 'Agreement for the development of custom software solutions',
-        effectiveDate: '2024-01-01',
-        expirationDate: '2024-12-31',
-        value: '50000',
-        currency: 'USD',
-        paymentTerms: 'net30',
-        parties: {
-          firstParty: {
-            companyId: '1',
-            representative: 'John Smith',
-            position: 'CEO',
-            email: 'john@abccorp.com',
-            phone: '+1-555-0123'
-          },
-          secondParty: {
-            companyId: '2',
-            representative: 'Jane Doe',
-            position: 'CTO',
-            email: 'jane@xyz.com',
-            phone: '+44-555-0123'
-          }
-        },
-        deliverables: 'Custom software development, documentation, and support',
-        termsAndConditions: 'Standard terms and conditions apply',
-        governingLaw: 'New York State Law',
-        jurisdiction: 'New York County',
-        terminationClause: 'Either party may terminate with 30 days notice',
-        renewalTerms: 'Automatic renewal for 1 year unless terminated',
-        specialConditions: 'None',
-        attachments: []
-      };
-      setFormData(mockContract);
-    }
+    const fetchDocument = async () => {
+      try {
+        if (id) {
+          const data = await documentService.getContract(id);
+          setDocument(data);
+          setFormData(data);
+          // Mock versions data
+          const mockVersions = [
+            {
+              id: 1,
+              version: '1.0',
+              status: 'draft',
+              date: new Date(),
+              author: 'John Doe',
+              changes: 'Initial version'
+            },
+            {
+              id: 2,
+              version: '1.1',
+              status: 'review',
+              date: new Date(Date.now() - 86400000),
+              author: 'Jane Smith',
+              changes: 'Updated terms and conditions'
+            }
+          ];
+          setVersions(mockVersions);
+          setCurrentVersion(mockVersions[0]);
+          // Mock collaborators data
+          setCollaborators([
+            { id: 1, name: 'John Doe', role: 'Author', avatar: 'JD' },
+            { id: 2, name: 'Jane Smith', role: 'Reviewer', avatar: 'JS' }
+          ]);
+          // Mock workspaces data
+          setWorkspaces([
+            { id: 1, name: 'Legal Team', type: 'team' },
+            { id: 2, name: 'Sales Team', type: 'team' },
+            { id: 3, name: 'Personal', type: 'personal' }
+          ]);
+          setSelectedWorkspace({ id: 1, name: 'Legal Team', type: 'team' });
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocument();
   }, [id]);
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Required fields validation
-    if (!formData.contractNumber) newErrors.contractNumber = 'Contract number is required';
-    if (!formData.contractType) newErrors.contractType = 'Contract type is required';
-    if (!formData.title) newErrors.title = 'Title is required';
-    if (!formData.effectiveDate) newErrors.effectiveDate = 'Effective date is required';
-    if (!formData.expirationDate) newErrors.expirationDate = 'Expiration date is required';
-    if (!formData.value) newErrors.value = 'Value is required';
-    if (!formData.parties.firstParty.companyId) newErrors['parties.firstParty.companyId'] = 'First party company is required';
-    if (!formData.parties.secondParty.companyId) newErrors['parties.secondParty.companyId'] = 'Second party company is required';
-    
-    // Date validation
-    if (formData.effectiveDate && formData.expirationDate) {
-      if (new Date(formData.effectiveDate) >= new Date(formData.expirationDate)) {
-        newErrors.expirationDate = 'Expiration date must be after effective date';
+  const handleSave = async (type) => {
+    setIsSaving(true);
+    try {
+      const updatedDocument = {
+        ...document,
+        ...formData,
+        status: type === 'final' ? 'review' : 'draft',
+        lastSaved: new Date()
+      };
+      if (id) {
+        await documentService.updateContract(id, updatedDocument);
+      } else {
+        await documentService.createContract(updatedDocument);
       }
+      setDocument(updatedDocument);
+      setHasUnsavedChanges(false);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSaving(false);
     }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (formData.parties.firstParty.email && !emailRegex.test(formData.parties.firstParty.email)) {
-      newErrors['parties.firstParty.email'] = 'Invalid email format';
-    }
-    if (formData.parties.secondParty.email && !emailRegex.test(formData.parties.secondParty.email)) {
-      newErrors['parties.secondParty.email'] = 'Invalid email format';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+  const handlePreview = () => {
+    // Implement preview functionality
+    console.log('Preview document');
+  };
 
-    setIsSubmitting(true);
-    try {
-      // In a real app, this would make an API call
-      console.log('Submitting contract:', formData);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      navigate('/documents');
-    } catch (error) {
-      console.error('Error creating contract:', error);
-      setErrors({ submit: 'Failed to create contract. Please try again.' });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleExport = (type) => {
+    // Implement export functionality
+    console.log('Export document as', type);
+  };
+
+  const handleVersionSelect = (version) => {
+    setCurrentVersion(version);
+    // In a real app, this would load the document version
+    console.log('Select version', version);
+  };
+
+  const handleCollaboration = () => {
+    // Implement collaboration functionality
+    console.log('Open collaboration panel');
+  };
+
+  const handleWorkspaceSelect = (workspace) => {
+    setSelectedWorkspace(workspace);
+  };
+
+  const handleWorkspaceFilter = (query) => {
+    // Implement workspace filtering
+    console.log('Filter workspaces by', query);
+  };
+
+  const handleUnsavedChangesConfirm = () => {
+    handleSave('draft');
+  };
+
+  const handleUnsavedChangesCancel = () => {
+    navigate(-1);
+  };
+
+  const handleStatusChange = (newStatus) => {
+    setDocument(prev => ({
+      ...prev,
+      status: newStatus
+    }));
   };
 
   const handleChange = (e) => {
@@ -201,6 +230,7 @@ const ContractCreator = () => {
         [name]: value
       }));
     }
+    setHasUnsavedChanges(true);
   };
 
   const handleFileChange = (e) => {
@@ -209,6 +239,7 @@ const ContractCreator = () => {
       ...prev,
       attachments: [...prev.attachments, ...files]
     }));
+    setHasUnsavedChanges(true);
   };
 
   const removeAttachment = (index) => {
@@ -216,567 +247,505 @@ const ContractCreator = () => {
       ...prev,
       attachments: prev.attachments.filter((_, i) => i !== index)
     }));
+    setHasUnsavedChanges(true);
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <div className="flex">
-        <Sidebar 
-          isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        />
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
-        <main className="flex-1 p-6">
-          <div className="max-w-4xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => navigate(-1)}
-                  className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  {id ? 'Edit Contract' : 'Create New Contract'}
-                </h1>
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
+  return (
+    <DocumentLayout
+      title={id ? 'Edit Contract' : 'Create New Contract'}
+      documentType="Contract"
+      document={document}
+      versions={versions}
+      currentVersion={currentVersion}
+      onVersionSelect={handleVersionSelect}
+      hasUnsavedChanges={hasUnsavedChanges}
+      onSave={handleSave}
+      isSaving={isSaving}
+      lastSaved={document?.lastSaved}
+      onStatusChange={handleStatusChange}
+      onPreview={handlePreview}
+      onExport={handleExport}
+      onBack={() => navigate(-1)}
+      collaborators={collaborators}
+      workspaces={workspaces}
+      selectedWorkspace={selectedWorkspace}
+      onWorkspaceSelect={handleWorkspaceSelect}
+      onWorkspaceFilter={handleWorkspaceFilter}
+      onUnsavedChangesConfirm={handleUnsavedChangesConfirm}
+      onUnsavedChangesCancel={handleUnsavedChangesCancel}
+    >
+      <div className="space-y-6">
+        {/* Contract form content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-medium text-gray-900">Basic Information</h2>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="contractNumber" className="block text-sm font-medium text-gray-700">
+                  Contract Number
+                </label>
+                <input
+                  type="text"
+                  id="contractNumber"
+                  name="contractNumber"
+                  value={formData.contractNumber}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
               </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => navigate(-1)}
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+              <div>
+                <label htmlFor="contractType" className="block text-sm font-medium text-gray-700">
+                  Contract Type
+                </label>
+                <select
+                  id="contractType"
+                  name="contractType"
+                  value={formData.contractType}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                  <option value="">Select a type</option>
+                  {contractTypes.map(type => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  id="title"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={3}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Dates and Value */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-medium text-gray-900">Dates and Value</h2>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="effectiveDate" className="block text-sm font-medium text-gray-700">
+                  Effective Date
+                </label>
+                <input
+                  type="date"
+                  id="effectiveDate"
+                  name="effectiveDate"
+                  value={formData.effectiveDate}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="expirationDate" className="block text-sm font-medium text-gray-700">
+                  Expiration Date
+                </label>
+                <input
+                  type="date"
+                  id="expirationDate"
+                  name="expirationDate"
+                  value={formData.expirationDate}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="value" className="block text-sm font-medium text-gray-700">
+                    Value
+                  </label>
+                  <input
+                    type="number"
+                    id="value"
+                    name="value"
+                    value={formData.value}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
+                    Currency
+                  </label>
+                  <select
+                    id="currency"
+                    name="currency"
+                    value={formData.currency}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  >
+                    {currencies.map(currency => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.code} - {currency.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label htmlFor="paymentTerms" className="block text-sm font-medium text-gray-700">
+                  Payment Terms
+                </label>
+                <select
+                  id="paymentTerms"
+                  name="paymentTerms"
+                  value={formData.paymentTerms}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4" />
-                      <span>Save Contract</span>
-                    </>
-                  )}
-                </button>
+                  <option value="">Select payment terms</option>
+                  {paymentTerms.map(term => (
+                    <option key={term.id} value={term.id}>
+                      {term.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Parties Information */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium text-gray-900">Parties Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* First Party */}
+            <div className="space-y-4">
+              <h3 className="text-base font-medium text-gray-900">First Party</h3>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="firstParty.companyId" className="block text-sm font-medium text-gray-700">
+                    Company
+                  </label>
+                  <select
+                    id="firstParty.companyId"
+                    name="firstParty.companyId"
+                    value={formData.parties.firstParty.companyId}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  >
+                    <option value="">Select a company</option>
+                    {mockCompanies.map(company => (
+                      <option key={company.id} value={company.id}>
+                        {company.name} ({company.type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="firstParty.representative" className="block text-sm font-medium text-gray-700">
+                    Representative
+                  </label>
+                  <input
+                    type="text"
+                    id="firstParty.representative"
+                    name="firstParty.representative"
+                    value={formData.parties.firstParty.representative}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="firstParty.position" className="block text-sm font-medium text-gray-700">
+                    Position
+                  </label>
+                  <input
+                    type="text"
+                    id="firstParty.position"
+                    name="firstParty.position"
+                    value={formData.parties.firstParty.position}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="firstParty.email" className="block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="firstParty.email"
+                    name="firstParty.email"
+                    value={formData.parties.firstParty.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="firstParty.phone" className="block text-sm font-medium text-gray-700">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="firstParty.phone"
+                    name="firstParty.phone"
+                    value={formData.parties.firstParty.phone}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
               </div>
             </div>
 
-            {errors.submit && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
-                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
-                <p className="text-red-600">{errors.submit}</p>
+            {/* Second Party */}
+            <div className="space-y-4">
+              <h3 className="text-base font-medium text-gray-900">Second Party</h3>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="secondParty.companyId" className="block text-sm font-medium text-gray-700">
+                    Company
+                  </label>
+                  <select
+                    id="secondParty.companyId"
+                    name="secondParty.companyId"
+                    value={formData.parties.secondParty.companyId}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  >
+                    <option value="">Select a company</option>
+                    {mockCompanies.map(company => (
+                      <option key={company.id} value={company.id}>
+                        {company.name} ({company.type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="secondParty.representative" className="block text-sm font-medium text-gray-700">
+                    Representative
+                  </label>
+                  <input
+                    type="text"
+                    id="secondParty.representative"
+                    name="secondParty.representative"
+                    value={formData.parties.secondParty.representative}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="secondParty.position" className="block text-sm font-medium text-gray-700">
+                    Position
+                  </label>
+                  <input
+                    type="text"
+                    id="secondParty.position"
+                    name="secondParty.position"
+                    value={formData.parties.secondParty.position}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="secondParty.email" className="block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="secondParty.email"
+                    name="secondParty.email"
+                    value={formData.parties.secondParty.email}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="secondParty.phone" className="block text-sm font-medium text-gray-700">
+                    Phone
+                  </label>
+                  <input
+                    type="tel"
+                    id="secondParty.phone"
+                    name="secondParty.phone"
+                    value={formData.parties.secondParty.phone}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Information */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium text-gray-900">Additional Information</h2>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="deliverables" className="block text-sm font-medium text-gray-700">
+                Deliverables
+              </label>
+              <textarea
+                id="deliverables"
+                name="deliverables"
+                value={formData.deliverables}
+                onChange={handleChange}
+                rows={3}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="termsAndConditions" className="block text-sm font-medium text-gray-700">
+                Terms and Conditions
+              </label>
+              <textarea
+                id="termsAndConditions"
+                name="termsAndConditions"
+                value={formData.termsAndConditions}
+                onChange={handleChange}
+                rows={3}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="governingLaw" className="block text-sm font-medium text-gray-700">
+                  Governing Law
+                </label>
+                <input
+                  type="text"
+                  id="governingLaw"
+                  name="governingLaw"
+                  value={formData.governingLaw}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+              <div>
+                <label htmlFor="jurisdiction" className="block text-sm font-medium text-gray-700">
+                  Jurisdiction
+                </label>
+                <input
+                  type="text"
+                  id="jurisdiction"
+                  name="jurisdiction"
+                  value={formData.jurisdiction}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="terminationClause" className="block text-sm font-medium text-gray-700">
+                Termination Clause
+              </label>
+              <textarea
+                id="terminationClause"
+                name="terminationClause"
+                value={formData.terminationClause}
+                onChange={handleChange}
+                rows={2}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="renewalTerms" className="block text-sm font-medium text-gray-700">
+                Renewal Terms
+              </label>
+              <textarea
+                id="renewalTerms"
+                name="renewalTerms"
+                value={formData.renewalTerms}
+                onChange={handleChange}
+                rows={2}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+            <div>
+              <label htmlFor="specialConditions" className="block text-sm font-medium text-gray-700">
+                Special Conditions
+              </label>
+              <textarea
+                id="specialConditions"
+                name="specialConditions"
+                value={formData.specialConditions}
+                onChange={handleChange}
+                rows={2}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Attachments */}
+        <div className="space-y-4">
+          <h2 className="text-lg font-medium text-gray-900">Attachments</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Upload Files
+              </label>
+              <input
+                type="file"
+                multiple
+                onChange={handleFileChange}
+                className="mt-1 block w-full text-sm text-gray-500
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-md file:border-0
+                  file:text-sm file:font-medium
+                  file:bg-blue-50 file:text-blue-700
+                  hover:file:bg-blue-100"
+              />
+            </div>
+            {formData.attachments.length > 0 && (
+              <div className="space-y-2">
+                {formData.attachments.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-600">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(index)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Basic Information */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Contract Number
-                    </label>
-                    <input
-                      type="text"
-                      name="contractNumber"
-                      value={formData.contractNumber}
-                      onChange={handleChange}
-                      className={`w-full ${errors.contractNumber ? 'border-red-500' : ''}`}
-                      placeholder="CNT-2024-001"
-                    />
-                    {errors.contractNumber && (
-                      <p className="mt-1 text-sm text-red-600">{errors.contractNumber}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Contract Type
-                    </label>
-                    <select
-                      name="contractType"
-                      value={formData.contractType}
-                      onChange={handleChange}
-                      className={`w-full ${errors.contractType ? 'border-red-500' : ''}`}
-                    >
-                      <option value="">Select Type</option>
-                      {contractTypes.map(type => (
-                        <option key={type.id} value={type.id}>
-                          {type.name}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.contractType && (
-                      <p className="mt-1 text-sm text-red-600">{errors.contractType}</p>
-                    )}
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      name="title"
-                      value={formData.title}
-                      onChange={handleChange}
-                      className={`w-full ${errors.title ? 'border-red-500' : ''}`}
-                      placeholder="Contract Title"
-                    />
-                    {errors.title && (
-                      <p className="mt-1 text-sm text-red-600">{errors.title}</p>
-                    )}
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows="3"
-                      className="w-full"
-                      placeholder="Brief description of the contract"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Dates and Value */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Dates and Value</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Effective Date
-                    </label>
-                    <input
-                      type="date"
-                      name="effectiveDate"
-                      value={formData.effectiveDate}
-                      onChange={handleChange}
-                      className={`w-full ${errors.effectiveDate ? 'border-red-500' : ''}`}
-                    />
-                    {errors.effectiveDate && (
-                      <p className="mt-1 text-sm text-red-600">{errors.effectiveDate}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Expiration Date
-                    </label>
-                    <input
-                      type="date"
-                      name="expirationDate"
-                      value={formData.expirationDate}
-                      onChange={handleChange}
-                      className={`w-full ${errors.expirationDate ? 'border-red-500' : ''}`}
-                    />
-                    {errors.expirationDate && (
-                      <p className="mt-1 text-sm text-red-600">{errors.expirationDate}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Value
-                    </label>
-                    <div className="flex space-x-2">
-                      <select
-                        name="currency"
-                        value={formData.currency}
-                        onChange={handleChange}
-                        className="w-24"
-                      >
-                        {currencies.map(currency => (
-                          <option key={currency.code} value={currency.code}>
-                            {currency.code}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="number"
-                        name="value"
-                        value={formData.value}
-                        onChange={handleChange}
-                        className={`flex-1 ${errors.value ? 'border-red-500' : ''}`}
-                        placeholder="0.00"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    {errors.value && (
-                      <p className="mt-1 text-sm text-red-600">{errors.value}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Payment Terms
-                    </label>
-                    <select
-                      name="paymentTerms"
-                      value={formData.paymentTerms}
-                      onChange={handleChange}
-                      className="w-full"
-                    >
-                      <option value="">Select Terms</option>
-                      {paymentTerms.map(term => (
-                        <option key={term.id} value={term.id}>
-                          {term.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Parties */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Contracting Parties</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* First Party */}
-                  <div className="space-y-4">
-                    <h3 className="font-medium text-gray-900">First Party</h3>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Company
-                      </label>
-                      <select
-                        name="parties.firstParty.companyId"
-                        value={formData.parties.firstParty.companyId}
-                        onChange={handleChange}
-                        className={`w-full ${errors['parties.firstParty.companyId'] ? 'border-red-500' : ''}`}
-                      >
-                        <option value="">Select Company</option>
-                        {mockCompanies.map(company => (
-                          <option key={company.id} value={company.id}>
-                            {company.name} ({company.type})
-                          </option>
-                        ))}
-                      </select>
-                      {errors['parties.firstParty.companyId'] && (
-                        <p className="mt-1 text-sm text-red-600">{errors['parties.firstParty.companyId']}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Representative
-                      </label>
-                      <input
-                        type="text"
-                        name="parties.firstParty.representative"
-                        value={formData.parties.firstParty.representative}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="Full Name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Position
-                      </label>
-                      <input
-                        type="text"
-                        name="parties.firstParty.position"
-                        value={formData.parties.firstParty.position}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="Job Title"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="parties.firstParty.email"
-                        value={formData.parties.firstParty.email}
-                        onChange={handleChange}
-                        className={`w-full ${errors['parties.firstParty.email'] ? 'border-red-500' : ''}`}
-                        placeholder="email@company.com"
-                      />
-                      {errors['parties.firstParty.email'] && (
-                        <p className="mt-1 text-sm text-red-600">{errors['parties.firstParty.email']}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="parties.firstParty.phone"
-                        value={formData.parties.firstParty.phone}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="+1-555-0123"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Second Party */}
-                  <div className="space-y-4">
-                    <h3 className="font-medium text-gray-900">Second Party</h3>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Company
-                      </label>
-                      <select
-                        name="parties.secondParty.companyId"
-                        value={formData.parties.secondParty.companyId}
-                        onChange={handleChange}
-                        className={`w-full ${errors['parties.secondParty.companyId'] ? 'border-red-500' : ''}`}
-                      >
-                        <option value="">Select Company</option>
-                        {mockCompanies.map(company => (
-                          <option key={company.id} value={company.id}>
-                            {company.name} ({company.type})
-                          </option>
-                        ))}
-                      </select>
-                      {errors['parties.secondParty.companyId'] && (
-                        <p className="mt-1 text-sm text-red-600">{errors['parties.secondParty.companyId']}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Representative
-                      </label>
-                      <input
-                        type="text"
-                        name="parties.secondParty.representative"
-                        value={formData.parties.secondParty.representative}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="Full Name"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Position
-                      </label>
-                      <input
-                        type="text"
-                        name="parties.secondParty.position"
-                        value={formData.parties.secondParty.position}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="Job Title"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="parties.secondParty.email"
-                        value={formData.parties.secondParty.email}
-                        onChange={handleChange}
-                        className={`w-full ${errors['parties.secondParty.email'] ? 'border-red-500' : ''}`}
-                        placeholder="email@company.com"
-                      />
-                      {errors['parties.secondParty.email'] && (
-                        <p className="mt-1 text-sm text-red-600">{errors['parties.secondParty.email']}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone
-                      </label>
-                      <input
-                        type="tel"
-                        name="parties.secondParty.phone"
-                        value={formData.parties.secondParty.phone}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="+1-555-0123"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contract Details */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Contract Details</h2>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Deliverables
-                    </label>
-                    <textarea
-                      name="deliverables"
-                      value={formData.deliverables}
-                      onChange={handleChange}
-                      rows="3"
-                      className="w-full"
-                      placeholder="List of deliverables and milestones"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Terms and Conditions
-                    </label>
-                    <textarea
-                      name="termsAndConditions"
-                      value={formData.termsAndConditions}
-                      onChange={handleChange}
-                      rows="3"
-                      className="w-full"
-                      placeholder="Standard terms and conditions"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Governing Law
-                      </label>
-                      <input
-                        type="text"
-                        name="governingLaw"
-                        value={formData.governingLaw}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="e.g., New York State Law"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Jurisdiction
-                      </label>
-                      <input
-                        type="text"
-                        name="jurisdiction"
-                        value={formData.jurisdiction}
-                        onChange={handleChange}
-                        className="w-full"
-                        placeholder="e.g., New York County"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Termination Clause
-                    </label>
-                    <textarea
-                      name="terminationClause"
-                      value={formData.terminationClause}
-                      onChange={handleChange}
-                      rows="2"
-                      className="w-full"
-                      placeholder="Terms for contract termination"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Renewal Terms
-                    </label>
-                    <textarea
-                      name="renewalTerms"
-                      value={formData.renewalTerms}
-                      onChange={handleChange}
-                      rows="2"
-                      className="w-full"
-                      placeholder="Terms for contract renewal"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Special Conditions
-                    </label>
-                    <textarea
-                      name="specialConditions"
-                      value={formData.specialConditions}
-                      onChange={handleChange}
-                      rows="2"
-                      className="w-full"
-                      placeholder="Any special conditions or requirements"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Attachments */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-lg font-medium text-gray-900 mb-4">Attachments</h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-center w-full">
-                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <FileText className="w-8 h-8 mb-2 text-gray-500" />
-                        <p className="mb-2 text-sm text-gray-500">
-                          <span className="font-semibold">Click to upload</span> or drag and drop
-                        </p>
-                        <p className="text-xs text-gray-500">PDF, DOC, DOCX (MAX. 10MB)</p>
-                      </div>
-                      <input
-                        type="file"
-                        className="hidden"
-                        multiple
-                        onChange={handleFileChange}
-                        accept=".pdf,.doc,.docx"
-                      />
-                    </label>
-                  </div>
-
-                  {formData.attachments.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.attachments.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <FileText className="w-5 h-5 text-gray-500" />
-                            <span className="text-sm text-gray-700">{file.name}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeAttachment(index)}
-                            className="p-1 text-gray-500 hover:text-red-600 rounded-full hover:bg-gray-100"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </form>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
+    </DocumentLayout>
   );
 };
 
