@@ -32,6 +32,7 @@ import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import DocumentSidebarContent from '../components/common/DocumentSidebarContent';
 import DocumentRightSidebar from '../components/common/DocumentRightSidebar';
+import DocumentFormWrapper from '../components/common/DocumentFormWrapper';
 
 // Mock data for companies
 const mockCompanies = [
@@ -69,13 +70,55 @@ const paymentTerms = [
   { id: 'milestone', name: 'Milestone-based' }
 ];
 
+// Default document state
+const defaultDocument = {
+  contractNumber: '',
+  contractDate: new Date().toISOString().split('T')[0],
+  contractType: '',
+  status: 'draft',
+  subject: '',
+  description: '',
+  effectiveDate: '',
+  expirationDate: '',
+  value: '',
+  currency: '',
+  paymentTerms: '',
+  termsAndConditions: '',
+  deliverables: '',
+  governingLaw: '',
+  jurisdiction: '',
+  terminationClause: '',
+  renewalTerms: '',
+  specialConditions: '',
+  seller: {
+    companyName: '',
+    representative: '',
+    position: '',
+    email: '',
+    phone: '',
+    address: '',
+    taxId: ''
+  },
+  buyer: {
+    companyName: '',
+    representative: '',
+    position: '',
+    email: '',
+    phone: '',
+    address: '',
+    taxId: ''
+  },
+  attachments: [],
+  lastSaved: null
+};
+
 const ContractCreator = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [document, setDocument] = useState(null);
+  const [document, setDocument] = useState(defaultDocument);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [versions, setVersions] = useState([]);
@@ -282,6 +325,25 @@ const ContractCreator = () => {
     setHasUnsavedChanges(true);
   };
 
+  const handleInputChange = (field, value) => {
+    setDocument(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handlePartyChange = (party, field, value) => {
+    setDocument(prev => ({
+      ...prev,
+      [party]: {
+        ...prev[party],
+        [field]: value
+      }
+    }));
+    setHasUnsavedChanges(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -363,398 +425,293 @@ const ContractCreator = () => {
                 </button>
               </div>
             ) : (
-              <div className="w-full space-y-6">
+              <DocumentFormWrapper>
                 {/* Contract Header */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">CONTRACT</h1>
-                      <p className="text-gray-600">Professional Contract Document</p>
-                    </div>
+                <DocumentFormWrapper.Section title="Contract Header">
+                  <div className="space-y-4">
+                    <DocumentFormWrapper.Grid cols={2}>
+                      <DocumentFormWrapper.Field label="Contract Number">
+                        <DocumentFormWrapper.Input
+                          type="text"
+                          value={document.contractNumber}
+                          onChange={(e) => handleInputChange('contractNumber', e.target.value)}
+                          placeholder="Enter contract number"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Contract Date">
+                        <DocumentFormWrapper.Input
+                          type="date"
+                          value={document.contractDate}
+                          onChange={(e) => handleInputChange('contractDate', e.target.value)}
+                        />
+                      </DocumentFormWrapper.Field>
+                    </DocumentFormWrapper.Grid>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-8 mt-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Number</label>
-                      <input
-                        type="text"
-                        value={formData.contractNumber}
-                        onChange={handleChange}
-                        name="contractNumber"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                      <input
-                        type="date"
-                        value={formData.effectiveDate}
-                        onChange={handleChange}
-                        name="effectiveDate"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      />
-                    </div>
-                  </div>
-                </div>
+                </DocumentFormWrapper.Section>
 
                 {/* Contract Type and Status */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <div className="grid grid-cols-2 gap-8">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type</label>
-                      <select
-                        value={formData.contractType}
-                        onChange={handleChange}
-                        name="contractType"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      >
-                        <option value="">Select Contract Type</option>
-                        {contractTypes.map(type => (
-                          <option key={type.id} value={type.id}>
-                            {type.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                      <select
-                        value={document?.status || 'draft'}
-                        onChange={(e) => handleStatusChange(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="review">Under Review</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                        <option value="expired">Expired</option>
-                      </select>
-                    </div>
+                <DocumentFormWrapper.Section title="Contract Type and Status">
+                  <div className="space-y-4">
+                    <DocumentFormWrapper.Grid cols={2}>
+                      <DocumentFormWrapper.Field label="Contract Type">
+                        <DocumentFormWrapper.Select
+                          value={document.contractType}
+                          onChange={(e) => handleInputChange('contractType', e.target.value)}
+                          options={[
+                            { value: 'sales', label: 'Sales Contract' },
+                            { value: 'service', label: 'Service Agreement' },
+                            { value: 'employment', label: 'Employment Contract' },
+                            { value: 'nda', label: 'Non-Disclosure Agreement' }
+                          ]}
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Status">
+                        <DocumentFormWrapper.Select
+                          value={document.status}
+                          onChange={(e) => handleStatusChange(e.target.value)}
+                          options={[
+                            { value: 'draft', label: 'Draft' },
+                            { value: 'review', label: 'In Review' },
+                            { value: 'approved', label: 'Approved' },
+                            { value: 'rejected', label: 'Rejected' },
+                            { value: 'expired', label: 'Expired' }
+                          ]}
+                        />
+                      </DocumentFormWrapper.Field>
+                    </DocumentFormWrapper.Grid>
                   </div>
-                </div>
+                </DocumentFormWrapper.Section>
 
                 {/* Parties Information */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Parties Information</h3>
+                <DocumentFormWrapper.Section title="Parties Information">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* First Party */}
-                    <div>
-                      <h4 className="text-base font-medium text-gray-900 mb-4">First Party</h4>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                          <select
-                            value={formData.parties.firstParty.companyId}
-                            onChange={handleChange}
-                            name="firstParty.companyId"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          >
-                            <option value="">Select a company</option>
-                            {mockCompanies.map(company => (
-                              <option key={company.id} value={company.id}>
-                                {company.name} ({company.type})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Representative</label>
-                          <input
-                            type="text"
-                            value={formData.parties.firstParty.representative}
-                            onChange={handleChange}
-                            name="firstParty.representative"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                          <input
-                            type="text"
-                            value={formData.parties.firstParty.position}
-                            onChange={handleChange}
-                            name="firstParty.position"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                          <input
-                            type="email"
-                            value={formData.parties.firstParty.email}
-                            onChange={handleChange}
-                            name="firstParty.email"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                          <input
-                            type="tel"
-                            value={formData.parties.firstParty.phone}
-                            onChange={handleChange}
-                            name="firstParty.phone"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                      </div>
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-gray-900">First Party</h4>
+                      <DocumentFormWrapper.Field label="Company">
+                        <DocumentFormWrapper.Select
+                          value={document.seller.companyId}
+                          onChange={(e) => handlePartyChange('seller', 'companyId', e.target.value)}
+                          options={mockCompanies.map(company => ({ value: company.id, label: `${company.name} (${company.type})` }))}
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Representative">
+                        <DocumentFormWrapper.Input
+                          type="text"
+                          value={document.seller.representative}
+                          onChange={(e) => handlePartyChange('seller', 'representative', e.target.value)}
+                          placeholder="Enter representative name"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Position">
+                        <DocumentFormWrapper.Input
+                          type="text"
+                          value={document.seller.position}
+                          onChange={(e) => handlePartyChange('seller', 'position', e.target.value)}
+                          placeholder="Enter position"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Email">
+                        <DocumentFormWrapper.Input
+                          type="email"
+                          value={document.seller.email}
+                          onChange={(e) => handlePartyChange('seller', 'email', e.target.value)}
+                          placeholder="Enter email"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Phone">
+                        <DocumentFormWrapper.Input
+                          type="tel"
+                          value={document.seller.phone}
+                          onChange={(e) => handlePartyChange('seller', 'phone', e.target.value)}
+                          placeholder="Enter phone number"
+                        />
+                      </DocumentFormWrapper.Field>
                     </div>
 
                     {/* Second Party */}
-                    <div>
-                      <h4 className="text-base font-medium text-gray-900 mb-4">Second Party</h4>
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                          <select
-                            value={formData.parties.secondParty.companyId}
-                            onChange={handleChange}
-                            name="secondParty.companyId"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          >
-                            <option value="">Select a company</option>
-                            {mockCompanies.map(company => (
-                              <option key={company.id} value={company.id}>
-                                {company.name} ({company.type})
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Representative</label>
-                          <input
-                            type="text"
-                            value={formData.parties.secondParty.representative}
-                            onChange={handleChange}
-                            name="secondParty.representative"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                          <input
-                            type="text"
-                            value={formData.parties.secondParty.position}
-                            onChange={handleChange}
-                            name="secondParty.position"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                          <input
-                            type="email"
-                            value={formData.parties.secondParty.email}
-                            onChange={handleChange}
-                            name="secondParty.email"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                          <input
-                            type="tel"
-                            value={formData.parties.secondParty.phone}
-                            onChange={handleChange}
-                            name="secondParty.phone"
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                          />
-                        </div>
-                      </div>
+                    <div className="space-y-4">
+                      <h4 className="text-sm font-medium text-gray-900">Second Party</h4>
+                      <DocumentFormWrapper.Field label="Company">
+                        <DocumentFormWrapper.Select
+                          value={document.buyer.companyId}
+                          onChange={(e) => handlePartyChange('buyer', 'companyId', e.target.value)}
+                          options={mockCompanies.map(company => ({ value: company.id, label: `${company.name} (${company.type})` }))}
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Representative">
+                        <DocumentFormWrapper.Input
+                          type="text"
+                          value={document.buyer.representative}
+                          onChange={(e) => handlePartyChange('buyer', 'representative', e.target.value)}
+                          placeholder="Enter representative name"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Position">
+                        <DocumentFormWrapper.Input
+                          type="text"
+                          value={document.buyer.position}
+                          onChange={(e) => handlePartyChange('buyer', 'position', e.target.value)}
+                          placeholder="Enter position"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Email">
+                        <DocumentFormWrapper.Input
+                          type="email"
+                          value={document.buyer.email}
+                          onChange={(e) => handlePartyChange('buyer', 'email', e.target.value)}
+                          placeholder="Enter email"
+                        />
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Phone">
+                        <DocumentFormWrapper.Input
+                          type="tel"
+                          value={document.buyer.phone}
+                          onChange={(e) => handlePartyChange('buyer', 'phone', e.target.value)}
+                          placeholder="Enter phone number"
+                        />
+                      </DocumentFormWrapper.Field>
                     </div>
                   </div>
-                </div>
+                </DocumentFormWrapper.Section>
 
                 {/* Contract Details */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Details</h3>
+                <DocumentFormWrapper.Section title="Contract Details">
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                      <input
+                    <DocumentFormWrapper.Field label="Title">
+                      <DocumentFormWrapper.Input
                         type="text"
-                        value={formData.title}
-                        onChange={handleChange}
-                        name="title"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        value={document.title}
+                        onChange={(e) => handleInputChange('title', e.target.value)}
+                        placeholder="Enter contract title"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                      <textarea
-                        value={formData.description}
-                        onChange={handleChange}
-                        name="description"
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Field label="Description">
+                      <DocumentFormWrapper.Textarea
+                        value={document.description}
+                        onChange={(e) => handleInputChange('description', e.target.value)}
+                        placeholder="Enter contract description"
                         rows={4}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       />
-                    </div>
-                    <div className="grid grid-cols-2 gap-8">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Effective Date</label>
-                        <input
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Grid cols={2}>
+                      <DocumentFormWrapper.Field label="Effective Date">
+                        <DocumentFormWrapper.Input
                           type="date"
-                          value={formData.effectiveDate}
-                          onChange={handleChange}
-                          name="effectiveDate"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          value={document.effectiveDate}
+                          onChange={(e) => handleInputChange('effectiveDate', e.target.value)}
                         />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
-                        <input
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Expiration Date">
+                        <DocumentFormWrapper.Input
                           type="date"
-                          value={formData.expirationDate}
-                          onChange={handleChange}
-                          name="expirationDate"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          value={document.expirationDate}
+                          onChange={(e) => handleInputChange('expirationDate', e.target.value)}
                         />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-8">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
-                        <input
+                      </DocumentFormWrapper.Field>
+                    </DocumentFormWrapper.Grid>
+                    <DocumentFormWrapper.Grid cols={2}>
+                      <DocumentFormWrapper.Field label="Value">
+                        <DocumentFormWrapper.Input
                           type="number"
-                          value={formData.value}
-                          onChange={handleChange}
-                          name="value"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          value={document.value}
+                          onChange={(e) => handleInputChange('value', e.target.value)}
                         />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
-                        <select
-                          value={formData.currency}
-                          onChange={handleChange}
-                          name="currency"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        >
-                          <option value="">Select Currency</option>
-                          {currencies.map(currency => (
-                            <option key={currency.code} value={currency.code}>
-                              {currency.code} - {currency.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-8">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Payment Terms</label>
-                        <select
-                          value={formData.paymentTerms}
-                          onChange={handleChange}
-                          name="paymentTerms"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        >
-                          <option value="">Select Payment Terms</option>
-                          {paymentTerms.map(term => (
-                            <option key={term.id} value={term.id}>
-                              {term.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
+                      </DocumentFormWrapper.Field>
+                      <DocumentFormWrapper.Field label="Currency">
+                        <DocumentFormWrapper.Select
+                          value={document.currency}
+                          onChange={(e) => handleInputChange('currency', e.target.value)}
+                          options={currencies.map(currency => ({ value: currency.code, label: `${currency.code} - ${currency.name}` }))}
+                        />
+                      </DocumentFormWrapper.Field>
+                    </DocumentFormWrapper.Grid>
+                    <DocumentFormWrapper.Field label="Payment Terms">
+                      <DocumentFormWrapper.Select
+                        value={document.paymentTerms}
+                        onChange={(e) => handleInputChange('paymentTerms', e.target.value)}
+                        options={paymentTerms.map(term => ({ value: term.id, label: term.name }))}
+                      />
+                    </DocumentFormWrapper.Field>
                   </div>
-                </div>
+                </DocumentFormWrapper.Section>
 
                 {/* Contract Terms */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Terms</h3>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Terms and Conditions</label>
-                    <textarea
-                      value={formData.termsAndConditions}
-                      onChange={handleChange}
-                      name="termsAndConditions"
-                      rows={6}
-                      placeholder="Enter contract terms and conditions..."
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
+                <DocumentFormWrapper.Section title="Contract Terms">
+                  <div className="space-y-4">
+                    <DocumentFormWrapper.Field label="Terms and Conditions">
+                      <DocumentFormWrapper.Textarea
+                        value={document.termsAndConditions}
+                        onChange={(e) => handleInputChange('termsAndConditions', e.target.value)}
+                        placeholder="Enter contract terms and conditions"
+                        rows={6}
+                      />
+                    </DocumentFormWrapper.Field>
                   </div>
-                </div>
+                </DocumentFormWrapper.Section>
 
                 {/* Additional Information */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+                <DocumentFormWrapper.Section title="Additional Information">
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Deliverables</label>
-                      <textarea
-                        value={formData.deliverables}
-                        onChange={handleChange}
-                        name="deliverables"
+                    <DocumentFormWrapper.Field label="Deliverables">
+                      <DocumentFormWrapper.Textarea
+                        value={document.deliverables}
+                        onChange={(e) => handleInputChange('deliverables', e.target.value)}
+                        placeholder="Enter contract deliverables"
                         rows={4}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Governing Law</label>
-                      <input
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Field label="Governing Law">
+                      <DocumentFormWrapper.Input
                         type="text"
-                        value={formData.governingLaw}
-                        onChange={handleChange}
-                        name="governingLaw"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        value={document.governingLaw}
+                        onChange={(e) => handleInputChange('governingLaw', e.target.value)}
+                        placeholder="Enter governing law"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Jurisdiction</label>
-                      <input
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Field label="Jurisdiction">
+                      <DocumentFormWrapper.Input
                         type="text"
-                        value={formData.jurisdiction}
-                        onChange={handleChange}
-                        name="jurisdiction"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        value={document.jurisdiction}
+                        onChange={(e) => handleInputChange('jurisdiction', e.target.value)}
+                        placeholder="Enter jurisdiction"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Termination Clause</label>
-                      <textarea
-                        value={formData.terminationClause}
-                        onChange={handleChange}
-                        name="terminationClause"
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Field label="Termination Clause">
+                      <DocumentFormWrapper.Textarea
+                        value={document.terminationClause}
+                        onChange={(e) => handleInputChange('terminationClause', e.target.value)}
+                        placeholder="Enter termination clause"
                         rows={2}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Renewal Terms</label>
-                      <textarea
-                        value={formData.renewalTerms}
-                        onChange={handleChange}
-                        name="renewalTerms"
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Field label="Renewal Terms">
+                      <DocumentFormWrapper.Textarea
+                        value={document.renewalTerms}
+                        onChange={(e) => handleInputChange('renewalTerms', e.target.value)}
+                        placeholder="Enter renewal terms"
                         rows={2}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Special Conditions</label>
-                      <textarea
-                        value={formData.specialConditions}
-                        onChange={handleChange}
-                        name="specialConditions"
+                    </DocumentFormWrapper.Field>
+                    <DocumentFormWrapper.Field label="Special Conditions">
+                      <DocumentFormWrapper.Textarea
+                        value={document.specialConditions}
+                        onChange={(e) => handleInputChange('specialConditions', e.target.value)}
+                        placeholder="Enter special conditions"
                         rows={2}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       />
-                    </div>
+                    </DocumentFormWrapper.Field>
                   </div>
-                </div>
+                </DocumentFormWrapper.Section>
 
                 {/* Attachments */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
+                <DocumentFormWrapper.Section title="Attachments">
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Upload Files
-                      </label>
-                      <input
+                    <DocumentFormWrapper.Field label="Upload Files">
+                      <DocumentFormWrapper.Input
                         type="file"
                         multiple
-                        onChange={handleFileChange}
+                        onChange={(e) => handleFileChange(e)}
                         className="mt-1 block w-full text-sm text-gray-500
                           file:mr-4 file:py-2 file:px-4
                           file:rounded-md file:border-0
@@ -762,7 +719,7 @@ const ContractCreator = () => {
                           file:bg-blue-50 file:text-blue-700
                           hover:file:bg-blue-100"
                       />
-                    </div>
+                    </DocumentFormWrapper.Field>
                     {formData.attachments.length > 0 && (
                       <div className="space-y-2">
                         {formData.attachments.map((file, index) => (
@@ -780,8 +737,8 @@ const ContractCreator = () => {
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
+                </DocumentFormWrapper.Section>
+              </DocumentFormWrapper>
             )}
           </div>
 
