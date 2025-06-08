@@ -10,7 +10,7 @@ import {
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
 import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
+import BaseSidebar from '../components/common/BaseSidebar';
 import WarningDialog from '../components/WarningDialog';
 
 // Helper function to compare objects and get changes
@@ -1141,7 +1141,7 @@ const MOCK_VERSIONS = [
   }
 ];
 
-export default function InvoiceCreator() {
+const InvoiceCreator = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -1431,10 +1431,9 @@ export default function InvoiceCreator() {
       <Header />
       
       <div className="flex h-[calc(100vh-64px)]">
-        <Sidebar 
+        <BaseSidebar 
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          className="bg-white border-r border-gray-200"
         >
           <InvoiceSidebarContent 
             versions={versions}
@@ -1446,7 +1445,7 @@ export default function InvoiceCreator() {
             lastSavedState={lastSavedState}
             invoice={invoice}
           />
-        </Sidebar>
+        </BaseSidebar>
         
         <div className={`flex-1 transition-all duration-300`}>
           <div className="flex h-full">
@@ -1514,4 +1513,6 @@ export default function InvoiceCreator() {
       />
     </div>
   );
-} 
+};
+
+export default InvoiceCreator; 

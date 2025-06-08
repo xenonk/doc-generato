@@ -18,7 +18,7 @@ import { useQuery } from 'react-query';
 import { documentService } from '../services/documentService';
 import { toast } from 'react-hot-toast';
 import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
+import BaseSidebar from '../components/common/BaseSidebar';
 import DashboardSidebar from '../components/DashboardSidebar';
 
 const DocumentTypeCard = ({ doc, onClick }) => {
@@ -170,12 +170,12 @@ export default function Dashboard() {
       <Header />
 
       <div className="flex">
-        <Sidebar 
+        <BaseSidebar 
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         >
           <DashboardSidebar isCollapsed={isSidebarCollapsed} />
-        </Sidebar>
+        </BaseSidebar>
 
         {/* Main Content */}
         <main className={`flex-1 transition-all duration-300`}>

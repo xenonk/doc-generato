@@ -29,7 +29,7 @@ import {
   FileArchive
 } from 'lucide-react';
 import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
+import BaseSidebar from '../components/common/BaseSidebar';
 import DocumentSidebarContent from '../components/common/DocumentSidebarContent';
 import DocumentRightSidebar from '../components/common/DocumentRightSidebar';
 import DocumentFormWrapper from '../components/common/DocumentFormWrapper';
@@ -382,7 +382,7 @@ const ContractCreator = () => {
       <Header />
       
       <div className="flex h-[calc(100vh-64px)]">
-        <Sidebar 
+        <BaseSidebar 
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           className="bg-white border-r border-gray-200"
@@ -407,7 +407,7 @@ const ContractCreator = () => {
             onUnsavedChangesConfirm={handleUnsavedChangesConfirm}
             onUnsavedChangesCancel={handleUnsavedChangesCancel}
           />
-        </Sidebar>
+        </BaseSidebar>
         
         <div className="flex-1 flex">
           <div className="flex-1 p-6 overflow-y-auto">
