@@ -29,6 +29,17 @@ const getChanges = (oldObj, newObj, prefix = '') => {
   return changes;
 };
 
+// Helper function to format date and time
+const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear().toString().slice(-2);
+  return `${hours}:${minutes} ${day}.${month}.${year}`;
+};
+
 // Version History Item Component
 const VersionHistoryItem = ({ version, isCurrent, onClick, isCollapsed }) => {
   const getStatusColor = (isCurrent) => isCurrent ? 'bg-green-500' : 'bg-gray-300';
@@ -37,18 +48,106 @@ const VersionHistoryItem = ({ version, isCurrent, onClick, isCollapsed }) => {
     <button
       onClick={onClick}
       className={`w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
-      title={isCollapsed ? version.name : undefined}
+      title={isCollapsed ? `${version.name} - ${version.user.name} (${formatDateTime(version.created_at)})` : undefined}
     >
       <div className={`w-2 h-2 ${getStatusColor(isCurrent)} rounded-full`}></div>
       {!isCollapsed && (
         <div className="flex-1 text-left">
-          <p className={`text-sm ${isCurrent ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
-            {version.name}
-          </p>
-          <p className="text-xs text-gray-500">{version.timestamp}</p>
+          <div className="flex items-center justify-between">
+            <p className={`text-sm ${isCurrent ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
+              {version.name}
+            </p>
+            <span className="text-xs text-gray-500">{formatDateTime(version.created_at)}</span>
+          </div>
+          <div className="flex items-center mt-1">
+            <div className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mr-2">
+              {version.user.avatar ? (
+                <img src={version.user.avatar} alt={version.user.name} className="w-full h-full object-cover" />
+              ) : (
+                <User className="w-3 h-3 text-gray-500" />
+              )}
+            </div>
+            <p className="text-xs text-gray-500">{version.user.name}</p>
+          </div>
         </div>
       )}
     </button>
+  );
+};
+
+// Version History Component
+const VersionHistory = ({ versions, currentVersion, onVersionSelect, isCollapsed }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (isCollapsed) {
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <div 
+          onMouseEnter={() => setIsOpen(true)}
+          className="flex items-center justify-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer"
+          title="Version History"
+        >
+          <History className="w-5 h-5 text-gray-500" />
+        </div>
+        {isOpen && (
+          <div 
+            onMouseLeave={() => setIsOpen(false)}
+            className="absolute left-full top-0 ml-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+          >
+            <div className="p-3 border-b border-gray-200">
+              <h3 className="text-sm font-medium text-gray-900">Version History</h3>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              {versions.map((version) => (
+                <VersionHistoryItem
+                  key={version.id}
+                  version={version}
+                  isCurrent={version.id === currentVersion?.id}
+                  onClick={() => {
+                    onVersionSelect(version);
+                    setIsOpen(false);
+                  }}
+                  isCollapsed={false}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-medium text-gray-900">Version History</h3>
+        <History className="w-4 h-4 text-gray-400" />
+      </div>
+      <div className="space-y-1">
+        {versions.map((version) => (
+          <VersionHistoryItem
+            key={version.id}
+            version={version}
+            isCurrent={version.id === currentVersion?.id}
+            onClick={() => onVersionSelect(version)}
+            isCollapsed={false}
+          />
+        ))}
+      </div>
+    </div>
   );
 };
 
@@ -300,23 +399,12 @@ const InvoiceSidebarContent = ({
         </div>
 
         {/* Version History */}
-        <div className={`mb-6 ${isCollapsed ? 'px-0' : ''}`}>
-          <div className={`flex items-center justify-between mb-3 ${isCollapsed ? 'justify-center' : ''}`}>
-            <h3 className={`text-sm font-medium text-gray-900 ${isCollapsed ? 'hidden' : ''}`}>Version History</h3>
-            <History className={`w-4 h-4 text-gray-400 ${isCollapsed ? 'mx-auto' : ''}`} />
-          </div>
-          <div className={`space-y-1 ${isCollapsed ? 'space-y-2' : ''}`}>
-            {versions.map((version) => (
-              <VersionHistoryItem
-                key={version.id}
-                version={version}
-                isCurrent={version.id === currentVersion?.id}
-                onClick={() => onVersionSelect(version)}
-                isCollapsed={isCollapsed}
-              />
-            ))}
-          </div>
-        </div>
+        <VersionHistory
+          versions={versions}
+          currentVersion={currentVersion}
+          onVersionSelect={onVersionSelect}
+          isCollapsed={isCollapsed}
+        />
       </div>
       <div className={`border-t border-gray-200 p-4 ${isCollapsed ? 'px-2' : ''}`}>
         <div className={`text-xs text-gray-500 ${isCollapsed ? 'text-center' : ''}`}>
@@ -757,8 +845,13 @@ const MOCK_VERSIONS = [
   {
     id: 'current',
     name: 'Current Version',
-    timestamp: 'Just now',
     created_at: new Date().toISOString(),
+    user: {
+      id: 1,
+      name: 'John Smith',
+      avatar: null,
+      role: 'Admin'
+    },
     data: {
       number: 'INV-2024-001',
       date: new Date().toISOString().split('T')[0],
@@ -785,8 +878,13 @@ const MOCK_VERSIONS = [
   {
     id: 'v3',
     name: 'Auto-save',
-    timestamp: '15 minutes ago',
     created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    user: {
+      id: 1,
+      name: 'John Smith',
+      avatar: null,
+      role: 'Admin'
+    },
     data: {
       number: 'INV-2024-001',
       date: new Date().toISOString().split('T')[0],
@@ -816,8 +914,13 @@ const MOCK_VERSIONS = [
   {
     id: 'v2',
     name: 'Version 2',
-    timestamp: '1 hour ago',
     created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    user: {
+      id: 2,
+      name: 'Sarah Johnson',
+      avatar: null,
+      role: 'Editor'
+    },
     data: {
       number: 'INV-2024-001',
       date: new Date().toISOString().split('T')[0],
@@ -846,8 +949,13 @@ const MOCK_VERSIONS = [
   {
     id: 'v1',
     name: 'Initial Version',
-    timestamp: '2 hours ago',
     created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    user: {
+      id: 3,
+      name: 'Michael Brown',
+      avatar: null,
+      role: 'Viewer'
+    },
     data: {
       number: 'INV-2024-001',
       date: new Date().toISOString().split('T')[0],
