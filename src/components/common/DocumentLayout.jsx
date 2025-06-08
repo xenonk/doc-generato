@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import DocumentHeader from './DocumentHeader';
 import DocumentSidebarContent from './DocumentSidebarContent';
 import DocumentRightSidebar from './DocumentRightSidebar';
 import Sidebar from './Sidebar';
@@ -45,22 +44,6 @@ const DocumentLayout = ({
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* Header */}
-      <DocumentHeader
-        title={title}
-        documentType={documentType}
-        isEditing={true}
-        isSubmitting={isSaving}
-        onSave={onSave}
-        onCancel={onBack}
-        onPreview={onPreview}
-        onExport={handleExport}
-        onPrint={() => handleExport('print')}
-        onShare={() => handleExport('share')}
-        showBackButton={showBackButton}
-        additionalActions={additionalHeaderActions}
-      />
-
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Sidebar */}
