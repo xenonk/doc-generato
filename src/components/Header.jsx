@@ -33,16 +33,16 @@ const Header = () => {
   const isHandbookActive = handbookItems.some(item => location.pathname.startsWith(item.path));
 
   return (
-    <div className="bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between px-6 py-4">
+    <div className="sticky top-0 z-50 bg-white border-b border-gray-200 h-[50px]">
+      <div className="flex items-center justify-between h-full px-6">
         {/* Logo and Navigation */}
         <div className="flex items-center space-x-8">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <FileText className="w-5 h-5 text-white" />
+            <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center">
+              <FileText className="w-3.5 h-3.5 text-white" />
             </div>
-            <span className="text-xl font-bold text-gray-900">DocuFlow</span>
+            <span className="text-base font-bold text-gray-900">DocuFlow</span>
           </div>
 
           {/* Navigation */}
@@ -54,13 +54,13 @@ const Header = () => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 text-sm font-medium ${
+                  className={`flex items-center space-x-1.5 text-sm font-medium ${
                     isActive 
                       ? 'text-blue-600' 
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -70,15 +70,15 @@ const Header = () => {
             <div className="relative">
               <button
                 onClick={() => setShowHandbooksDropdown(!showHandbooksDropdown)}
-                className={`flex items-center space-x-2 text-sm font-medium ${
+                className={`flex items-center space-x-1.5 text-sm font-medium ${
                   isHandbookActive 
                     ? 'text-blue-600' 
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-3.5 h-3.5" />
                 <span>Handbooks</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${showHandbooksDropdown ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showHandbooksDropdown ? 'rotate-180' : ''}`} />
               </button>
 
               {showHandbooksDropdown && (
@@ -124,18 +124,18 @@ const Header = () => {
             <input
               type="text"
               placeholder="Search documents..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full h-8 pl-8 pr-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
-            <Search className="absolute left-3 top-2.5 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
           </div>
         </div>
 
         {/* Right User Menu */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <button className="relative p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          <button className="relative p-1 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100">
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 bg-red-500 rounded-full"></span>
           </button>
 
           {/* User Profile */}
@@ -144,19 +144,19 @@ const Header = () => {
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
             >
-              <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                 {user.avatar ? (
                   <img 
                     src={user.avatar} 
                     alt={user.name} 
-                    className="w-8 h-8 rounded-full"
+                    className="w-6 h-6 rounded-full"
                   />
                 ) : (
-                  <User className="w-5 h-5 text-gray-500" />
+                  <User className="w-3.5 h-3.5 text-gray-500" />
                 )}
               </div>
               <span className="text-sm font-medium">{user.name}</span>
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-3.5 h-3.5" />
             </button>
 
             {showProfileDropdown && (

@@ -9,7 +9,9 @@ import {
   Layers,
   Filter,
   MoreHorizontal,
-  Plus
+  Plus,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { DOCUMENT_TYPES } from '../config/documentTypes';
 import { useQuery } from 'react-query';
@@ -117,6 +119,7 @@ const AnalyticsCard = ({ metric }) => (
 export default function Dashboard() {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState('All');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   // Fetch recent documents
   const { data: recentDocuments = [], isLoading: isLoadingDocuments } = useQuery(
@@ -165,38 +168,64 @@ export default function Dashboard() {
       <Header />
 
       <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 bg-white border-r border-gray-200 min-h-screen">
-          <nav className="p-4 space-y-2">
-            {[
-              { name: 'Dashboard', icon: Home, active: true },
-              { name: 'Document Sets', icon: Layers, active: false },
-              { name: 'Create Document', icon: FileText, active: false },
-              { name: 'My Documents', icon: FolderOpen, active: false },
-              { name: 'Shared', icon: Share2, active: false },
-              { name: 'Templates', icon: FileText, active: false },
-              { name: 'Analytics', icon: BarChart3, active: false }
-            ].map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                    item.active
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <IconComponent className="w-5 h-5" />
-                  <span className="text-sm font-medium">{item.name}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </aside>
+        {/* Sidebar Container */}
+        <div className="relative">
+          {/* Sidebar */}
+          <aside 
+            className={`bg-white border-r border-gray-200 min-h-[calc(100vh-50px)] transition-all duration-300 ${
+              isSidebarCollapsed ? 'w-16' : 'w-64'
+            }`}
+          >
+            <nav className={`p-4 space-y-2 ${isSidebarCollapsed ? 'px-2' : ''}`}>
+              {[
+                { name: 'Dashboard', icon: Home, active: true },
+                { name: 'Document Sets', icon: Layers, active: false },
+                { name: 'Create Document', icon: FileText, active: false },
+                { name: 'My Documents', icon: FolderOpen, active: false },
+                { name: 'Shared', icon: Share2, active: false },
+                { name: 'Templates', icon: FileText, active: false },
+                { name: 'Analytics', icon: BarChart3, active: false }
+              ].map((item) => {
+                const IconComponent = item.icon;
+                return (
+                  <button
+                    key={item.name}
+                    className={`w-full flex items-center ${
+                      isSidebarCollapsed ? 'justify-center' : 'space-x-3'
+                    } px-3 py-2 rounded-lg text-left transition-colors ${
+                      item.active
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                    title={isSidebarCollapsed ? item.name : ''}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                    {!isSidebarCollapsed && (
+                      <span className="text-sm font-medium">{item.name}</span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+
+          {/* Sidebar Toggle Button */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm z-10"
+          >
+            {isSidebarCollapsed ? (
+              <ChevronRight className="w-3.5 h-3.5" />
+            ) : (
+              <ChevronLeft className="w-3.5 h-3.5" />
+            )}
+          </button>
+        </div>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <main className={`flex-1 p-6 transition-all duration-300 ${
+          isSidebarCollapsed ? 'ml-16' : 'ml-64'
+        }`}>
           <div className="space-y-8">
             {/* Quick Document Creation */}
             <section>
