@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import DocumentSidebarContent from './DocumentLeftSidebar';
-import DocumentRightSidebar from './DocumentRightSidebar';
-import BaseSidebar from './BaseSidebar';
+import DocumentSidebarContent from './sidebars/DocumentLeftSidebar';
+import DocumentRightSidebar from './sidebars/DocumentRightSidebar';
+import BaseSidebar from './sidebars/BaseSidebar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DocumentLayout = ({

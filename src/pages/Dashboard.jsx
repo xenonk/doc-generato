@@ -18,7 +18,7 @@ import { useQuery } from 'react-query';
 import { documentService } from '../services/documentService';
 import { toast } from 'react-hot-toast';
 import Header from '../components/Header';
-import BaseSidebar from '../components/common/BaseSidebar';
+import BaseSidebar from '../components/common/sidebars/BaseSidebar';
 import DashboardSidebar from '../components/DashboardSidebar';
 
 const DocumentTypeCard = ({ doc, onClick }) => {

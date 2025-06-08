@@ -10,7 +10,7 @@ import {
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
 import Header from '../components/Header';
-import BaseSidebar from '../components/common/BaseSidebar';
+import BaseSidebar from '../components/common/sidebars/BaseSidebar';
 import WarningDialog from '../components/WarningDialog';
 
 // Helper function to compare objects and get changes

@@ -29,9 +29,9 @@ import {
   FileArchive
 } from 'lucide-react';
 import Header from '../components/Header';
-import BaseSidebar from '../components/common/BaseSidebar';
-import DocumentSidebarContent from '../components/common/DocumentLeftSidebar';
-import DocumentRightSidebar from '../components/common/DocumentRightSidebar';
+import BaseSidebar from '../components/common/sidebars/BaseSidebar';
+import DocumentSidebarContent from '../components/common/sidebars/DocumentLeftSidebar';
+import DocumentRightSidebar from '../components/common/sidebars/DocumentRightSidebar';
 import DocumentFormWrapper from '../components/common/DocumentFormWrapper';
 
 // Mock data for companies

@@ -4,7 +4,7 @@ import {
   FileText, ChevronDown, ChevronUp,
   Share2
 } from 'lucide-react';
-import BaseSidebar from './common/BaseSidebar';
+import BaseSidebar from './common/sidebars/BaseSidebar';
 
 const DashboardSidebar = ({ isCollapsed }) => {
   const [expandedSections, setExpandedSections] = useState({
