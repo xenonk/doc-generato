@@ -3,14 +3,24 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Search, Bell, User, Settings, Moon, LogOut, 
   ChevronDown, FileText, FolderOpen, Layers, 
-  FileType, BarChart2 
+  FileType, BarChart2, BookOpen, Building2,
+  ScrollText, Package, Coins, Globe
 } from 'lucide-react';
 import { getUserProfile } from '../utils/auth';
 
 const Header = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showHandbooksDropdown, setShowHandbooksDropdown] = useState(false);
   const location = useLocation();
   const user = getUserProfile();
+
+  const handbookItems = [
+    { path: '/handbooks/companies', label: 'Companies', icon: Building2 },
+    { path: '/handbooks/contracts', label: 'Contracts', icon: ScrollText },
+    { path: '/handbooks/incoterms', label: 'Incoterms', icon: Globe },
+    { path: '/handbooks/packages', label: 'Packages', icon: Package },
+    { path: '/handbooks/currencies', label: 'Currencies', icon: Coins }
+  ];
 
   const navItems = [
     { path: '/dashboard', label: 'Dashboard', icon: FileText },
@@ -19,6 +29,8 @@ const Header = () => {
     { path: '/templates', label: 'Templates', icon: FileType },
     { path: '/analytics', label: 'Analytics', icon: BarChart2 }
   ];
+
+  const isHandbookActive = handbookItems.some(item => location.pathname.startsWith(item.path));
 
   return (
     <div className="bg-white border-b border-gray-200">
@@ -53,6 +65,56 @@ const Header = () => {
                 </Link>
               );
             })}
+
+            {/* Handbooks Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowHandbooksDropdown(!showHandbooksDropdown)}
+                className={`flex items-center space-x-2 text-sm font-medium ${
+                  isHandbookActive 
+                    ? 'text-blue-600' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Handbooks</span>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showHandbooksDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showHandbooksDropdown && (
+                <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="py-1">
+                    <Link
+                      to="/handbooks"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      onClick={() => setShowHandbooksDropdown(false)}
+                    >
+                      All Handbooks
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    {handbookItems.map(item => {
+                      const Icon = item.icon;
+                      const isActive = location.pathname === item.path;
+                      return (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          className={`flex items-center space-x-2 px-4 py-2 text-sm ${
+                            isActive 
+                              ? 'text-blue-600 bg-blue-50' 
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                          onClick={() => setShowHandbooksDropdown(false)}
+                        >
+                          <Icon className="w-4 h-4" />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </nav>
         </div>
 
