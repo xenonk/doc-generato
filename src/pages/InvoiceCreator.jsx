@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from 'react-query';
 import { toast } from 'react-hot-toast';
@@ -10,9 +10,52 @@ import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
+import WarningDialog from '../components/WarningDialog';
+
+// Helper function to compare objects and get changes
+const getChanges = (oldObj, newObj, prefix = '') => {
+  const changes = [];
+  
+  for (const key in newObj) {
+    if (typeof newObj[key] === 'object' && newObj[key] !== null && !Array.isArray(newObj[key])) {
+      changes.push(...getChanges(oldObj[key] || {}, newObj[key], `${prefix}${key}.`));
+    } else if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
+      const fieldName = key.replace(/([A-Z])/g, ' $1').toLowerCase();
+      changes.push(`${prefix}${fieldName} changed from "${oldObj[key] || 'empty'}" to "${newObj[key] || 'empty'}"`);
+    }
+  }
+  
+  return changes;
+};
+
+// Version History Item Component
+const VersionHistoryItem = ({ version, isCurrent, onClick }) => {
+  const getStatusColor = (isCurrent) => isCurrent ? 'bg-green-500' : 'bg-gray-300';
+  
+  return (
+    <button
+      onClick={onClick}
+      className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+    >
+      <div className={`w-2 h-2 ${getStatusColor(isCurrent)} rounded-full`}></div>
+      <div className="flex-1 text-left">
+        <p className={`text-sm ${isCurrent ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
+          {version.name}
+        </p>
+        <p className="text-xs text-gray-500">{version.timestamp}</p>
+      </div>
+    </button>
+  );
+};
 
 // Invoice Sidebar Content Component
-const InvoiceSidebarContent = ({ onSaveAsDraft }) => {
+const InvoiceSidebarContent = ({ 
+  onSaveAsDraft, 
+  versions = [], 
+  currentVersion,
+  onVersionSelect,
+  hasUnsavedChanges
+}) => {
   const [workspaces] = useState([
     { id: 1, name: 'Current Invoice', active: true },
     { id: 2, name: 'Q1 2024 Invoices', active: false },
@@ -57,30 +100,28 @@ const InvoiceSidebarContent = ({ onSaveAsDraft }) => {
           <h3 className="text-sm font-medium text-gray-900">Version History</h3>
           <History className="w-4 h-4 text-gray-400" />
         </div>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <div>
-              <p className="text-sm font-medium text-gray-900">Current Version</p>
-              <p className="text-xs text-gray-500">2 minutes ago</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-            <div>
-              <p className="text-sm text-gray-600">Auto-save</p>
-              <p className="text-xs text-gray-500">15 minutes ago</p>
-            </div>
-          </div>
+        <div className="space-y-1">
+          {versions.map((version) => (
+            <VersionHistoryItem
+              key={version.id}
+              version={version}
+              isCurrent={version.id === currentVersion?.id}
+              onClick={() => onVersionSelect(version)}
+            />
+          ))}
         </div>
       </div>
 
       {/* Save as Draft */}
       <button
         onClick={onSaveAsDraft}
-        className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
+        className={`w-full px-4 py-2 text-sm rounded-lg border ${
+          hasUnsavedChanges 
+            ? 'text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100' 
+            : 'text-gray-600 border-gray-200 hover:bg-gray-100'
+        }`}
       >
-        Save as Draft
+        {hasUnsavedChanges ? 'Save Changes' : 'Save as Draft'}
       </button>
     </div>
   );
@@ -448,11 +489,136 @@ const InvoiceForm = ({
   );
 };
 
+// Mock version history data
+const MOCK_VERSIONS = [
+  {
+    id: 'current',
+    name: 'Current Version',
+    timestamp: 'Just now',
+    created_at: new Date().toISOString(),
+    data: {
+      number: 'INV-2024-001',
+      date: new Date().toISOString().split('T')[0],
+      seller: {
+        company: '',
+        address: '',
+        director: '',
+        email: ''
+      },
+      buyer: {
+        company: '',
+        address: '',
+        contactPerson: '',
+        email: ''
+      },
+      bankDetails: '',
+      items: [],
+      currency: 'USD',
+      subtotal: 0,
+      tax: 0,
+      total: 0
+    }
+  },
+  {
+    id: 'v3',
+    name: 'Auto-save',
+    timestamp: '15 minutes ago',
+    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    data: {
+      number: 'INV-2024-001',
+      date: new Date().toISOString().split('T')[0],
+      seller: {
+        company: 'TechCorp Solutions Ltd.',
+        address: '123 Business Ave\nSuite 100\nNew York, NY 10001',
+        director: 'John Smith',
+        email: 'john@techcorp.com'
+      },
+      buyer: {
+        company: 'Acme Corporation',
+        address: '456 Corporate Blvd\nFloor 25\nLos Angeles, CA 90210',
+        contactPerson: 'Jane Doe',
+        email: 'jane@acme.com'
+      },
+      bankDetails: 'Chase Bank - Account: ****1234',
+      items: [
+        { id: 1, name: 'Software License', grossWeight: 0.5, netWeight: 0.5, unitPrice: 1200.00, amount: 1, total: 1200.00 },
+        { id: 2, name: 'Consulting Services', grossWeight: 0, netWeight: 0, unitPrice: 150.00, amount: 8, total: 1200.00 }
+      ],
+      currency: 'USD',
+      subtotal: 2400.00,
+      tax: 240.00,
+      total: 2640.00
+    }
+  },
+  {
+    id: 'v2',
+    name: 'Version 2',
+    timestamp: '1 hour ago',
+    created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    data: {
+      number: 'INV-2024-001',
+      date: new Date().toISOString().split('T')[0],
+      seller: {
+        company: 'TechCorp Solutions Ltd.',
+        address: '123 Business Ave\nSuite 100\nNew York, NY 10001',
+        director: 'John Smith',
+        email: 'john@techcorp.com'
+      },
+      buyer: {
+        company: 'Acme Corporation',
+        address: '456 Corporate Blvd\nFloor 25\nLos Angeles, CA 90210',
+        contactPerson: 'Jane Doe',
+        email: 'jane@acme.com'
+      },
+      bankDetails: 'Chase Bank - Account: ****1234',
+      items: [
+        { id: 1, name: 'Software License', grossWeight: 0.5, netWeight: 0.5, unitPrice: 1000.00, amount: 1, total: 1000.00 }
+      ],
+      currency: 'USD',
+      subtotal: 1000.00,
+      tax: 100.00,
+      total: 1100.00
+    }
+  },
+  {
+    id: 'v1',
+    name: 'Initial Version',
+    timestamp: '2 hours ago',
+    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    data: {
+      number: 'INV-2024-001',
+      date: new Date().toISOString().split('T')[0],
+      seller: {
+        company: 'TechCorp Solutions Ltd.',
+        address: '123 Business Ave\nSuite 100\nNew York, NY 10001',
+        director: 'John Smith',
+        email: 'john@techcorp.com'
+      },
+      buyer: {
+        company: 'Acme Corporation',
+        address: '456 Corporate Blvd\nFloor 25\nLos Angeles, CA 90210',
+        contactPerson: 'Jane Doe',
+        email: 'jane@acme.com'
+      },
+      bankDetails: '',
+      items: [],
+      currency: 'USD',
+      subtotal: 0,
+      tax: 0,
+      total: 0
+    }
+  }
+];
+
 export default function InvoiceCreator() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [selectedVersion, setSelectedVersion] = useState(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedState, setLastSavedState] = useState(null);
 
   const [invoice, setInvoice] = useState({
     number: 'INV-2024-001',
@@ -498,17 +664,34 @@ export default function InvoiceCreator() {
     }
   );
 
-  // Fetch invoice if editing
-  useEffect(() => {
-    if (isEditing) {
-      documentService.getInvoice(id)
-        .then(data => setInvoice(data))
-        .catch(error => {
-          toast.error(`Failed to load invoice: ${error.message}`);
-          navigate('/');
-        });
+  // Replace the versions query with mock data temporarily
+  const { data: versions = MOCK_VERSIONS, isLoading: isLoadingVersions } = useQuery(
+    ['versions', id],
+    () => Promise.resolve(MOCK_VERSIONS), // Simulate API call
+    {
+      enabled: !!id,
+      onError: (error) => {
+        toast.error(`Failed to load versions: ${error.message}`);
+      }
     }
-  }, [id, isEditing, navigate]);
+  );
+
+  // Set initial state from current version when component mounts
+  useEffect(() => {
+    if (versions.length > 0) {
+      const currentVersion = versions[0]; // First version is always current
+      setInvoice(currentVersion.data);
+      setLastSavedState(currentVersion.data);
+    }
+  }, [versions]);
+
+  // Track changes
+  useEffect(() => {
+    if (lastSavedState) {
+      const changes = getChanges(lastSavedState, invoice);
+      setHasUnsavedChanges(changes.length > 0);
+    }
+  }, [invoice, lastSavedState]);
 
   // Save mutations
   const createMutation = useMutation(
@@ -537,14 +720,66 @@ export default function InvoiceCreator() {
     }
   );
 
-  const handleSave = () => {
-    const mutation = isEditing ? updateMutation : createMutation;
-    mutation.mutate(invoice);
+  // Save current state when saving
+  const handleSave = async () => {
+    try {
+      const mutation = isEditing ? updateMutation : createMutation;
+      await mutation.mutateAsync(invoice);
+      setLastSavedState(JSON.parse(JSON.stringify(invoice)));
+      setHasUnsavedChanges(false);
+      toast.success('Invoice saved successfully');
+    } catch (error) {
+      toast.error(`Failed to save invoice: ${error.message}`);
+    }
   };
 
-  const handleSaveAsDraft = () => {
-    const mutation = isEditing ? updateMutation : createMutation;
-    mutation.mutate({ ...invoice, status: 'draft' });
+  // Handle save as draft
+  const handleSaveAsDraft = async () => {
+    try {
+      const mutation = isEditing ? updateMutation : createMutation;
+      await mutation.mutateAsync({ ...invoice, status: 'draft' });
+      setLastSavedState(JSON.parse(JSON.stringify(invoice)));
+      setHasUnsavedChanges(false);
+      toast.success('Invoice saved as draft');
+    } catch (error) {
+      toast.error(`Failed to save draft: ${error.message}`);
+    }
+  };
+
+  // Handle version selection
+  const handleVersionSelect = (version) => {
+    if (hasUnsavedChanges) {
+      setSelectedVersion(version);
+      setShowWarningDialog(true);
+    } else {
+      restoreVersion(version);
+    }
+  };
+
+  // Restore version
+  const restoreVersion = (version) => {
+    setInvoice(version.data);
+    setLastSavedState(version.data);
+    setHasUnsavedChanges(false);
+    toast.success('Version restored successfully');
+  };
+
+  // Handle warning dialog actions
+  const handleWarningDialogConfirm = () => {
+    restoreVersion(selectedVersion);
+    setShowWarningDialog(false);
+    setSelectedVersion(null);
+  };
+
+  const handleWarningDialogSaveAndGo = async () => {
+    try {
+      await handleSave();
+      restoreVersion(selectedVersion);
+      setShowWarningDialog(false);
+      setSelectedVersion(null);
+    } catch (error) {
+      toast.error('Failed to save changes');
+    }
   };
 
   const handleFieldChange = (field, value) => {
@@ -676,7 +911,13 @@ export default function InvoiceCreator() {
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         >
-          <InvoiceSidebarContent onSaveAsDraft={handleSaveAsDraft} />
+          <InvoiceSidebarContent 
+            onSaveAsDraft={handleSaveAsDraft}
+            versions={versions}
+            currentVersion={lastSavedState}
+            onVersionSelect={handleVersionSelect}
+            hasUnsavedChanges={hasUnsavedChanges}
+          />
         </Sidebar>
         
         <div className={`flex-1 transition-all duration-300`}>
@@ -713,6 +954,19 @@ export default function InvoiceCreator() {
           </div>
         </div>
       </div>
+
+      <WarningDialog
+        isOpen={showWarningDialog}
+        onClose={() => {
+          setShowWarningDialog(false);
+          setSelectedVersion(null);
+        }}
+        onConfirm={handleWarningDialogConfirm}
+        onSaveAndGo={handleWarningDialogSaveAndGo}
+        changes={lastSavedState ? getChanges(lastSavedState, invoice) : []}
+        title="Unsaved Changes"
+        message="You have unsaved changes that will be lost if you restore this version. Would you like to save your changes first?"
+      />
     </div>
   );
 } 
