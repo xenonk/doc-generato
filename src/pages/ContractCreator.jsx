@@ -6,9 +6,32 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 import { 
   FileText, Building2, Calendar, DollarSign, 
   User, Mail, Phone, Globe, FileSignature,
-  ChevronLeft, Save, X, AlertCircle
+  ChevronLeft, Save, X, AlertCircle,
+  Download,
+  Printer,
+  Share2,
+  Upload,
+  Trash2,
+  Check,
+  Clock,
+  Users,
+  MapPin,
+  Tag,
+  Percent,
+  File,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  Eye,
+  FileSpreadsheet,
+  FilePdf,
+  FileWord,
+  FileArchive
 } from 'lucide-react';
 import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
+import DocumentSidebarContent from '../components/common/DocumentSidebarContent';
+import DocumentRightSidebar from '../components/common/DocumentRightSidebar';
 
 // Mock data for companies
 const mockCompanies = [
@@ -95,6 +118,11 @@ const ContractCreator = () => {
     specialConditions: '',
     attachments: []
   });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [showSaveDropdown, setShowSaveDropdown] = useState(false);
+  const [lastSaved, setLastSaved] = useState(null);
 
   useEffect(() => {
     const fetchDocument = async () => {
@@ -136,6 +164,7 @@ const ContractCreator = () => {
             { id: 3, name: 'Personal', type: 'personal' }
           ]);
           setSelectedWorkspace({ id: 1, name: 'Legal Team', type: 'team' });
+          setLastSaved(data.lastSaved);
         }
       } catch (err) {
         setError(err.message);
@@ -163,6 +192,7 @@ const ContractCreator = () => {
       }
       setDocument(updatedDocument);
       setHasUnsavedChanges(false);
+      setLastSaved(updatedDocument.lastSaved);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -290,260 +320,72 @@ const ContractCreator = () => {
       <Header />
       
       <div className="flex h-[calc(100vh-64px)]">
-        <DocumentLayout
-          title={isEditing ? `Edit Contract ${id}` : 'Create Contract'}
-          documentType="Contract"
-          document={document}
-          versions={versions}
-          currentVersion={currentVersion}
-          onVersionSelect={handleVersionSelect}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSave={handleSave}
-          isSaving={isSaving}
-          lastSaved={document?.lastSaved}
-          onStatusChange={handleStatusChange}
-          onCollaborationClick={handleCollaboration}
-          onPreview={handlePreview}
-          onExport={handleExport}
-          onBack={() => navigate(-1)}
-          collaborators={collaborators}
-          workspaces={workspaces}
-          selectedWorkspace={selectedWorkspace}
-          onWorkspaceSelect={handleWorkspaceSelect}
-          onWorkspaceFilter={handleWorkspaceFilter}
-          onUnsavedChangesConfirm={handleUnsavedChangesConfirm}
-          onUnsavedChangesCancel={handleUnsavedChangesCancel}
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed}
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="bg-white border-r border-gray-200"
         >
+          <DocumentSidebarContent 
+            document={document}
+            versions={versions}
+            currentVersion={currentVersion}
+            onVersionSelect={handleVersionSelect}
+            hasUnsavedChanges={hasUnsavedChanges}
+            isCollapsed={isSidebarCollapsed}
+            onSave={handleSave}
+            lastSavedState={lastSaved}
+            documentType="Contract"
+            onStatusChange={handleStatusChange}
+            onCollaborationClick={handleCollaboration}
+            collaborators={collaborators}
+            workspaces={workspaces}
+            selectedWorkspace={selectedWorkspace}
+            onWorkspaceSelect={handleWorkspaceSelect}
+            onWorkspaceFilter={handleWorkspaceFilter}
+            onUnsavedChangesConfirm={handleUnsavedChangesConfirm}
+            onUnsavedChangesCancel={handleUnsavedChangesCancel}
+          />
+        </Sidebar>
+        
+        <div className="flex-1 flex">
           <div className="flex-1 p-6 overflow-y-auto">
-            <div className="w-full space-y-6">
-              {/* Contract Header */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">CONTRACT</h1>
-                    <p className="text-gray-600">Professional Contract Document</p>
-                  </div>
+            {error ? (
+              <div className="text-center">
+                <div className="text-red-600 text-xl mb-4">
+                  Failed to load data
                 </div>
-
-                <div className="grid grid-cols-2 gap-8 mt-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contract Number</label>
-                    <input
-                      type="text"
-                      value={formData.contractNumber}
-                      onChange={handleChange}
-                      name="contractNumber"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                    <input
-                      type="date"
-                      value={formData.effectiveDate}
-                      onChange={handleChange}
-                      name="effectiveDate"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                </div>
+                <p className="text-gray-600 mb-4">{error.message}</p>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Go Back to Dashboard
+                </button>
               </div>
-
-              {/* Contract Type and Status */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="grid grid-cols-2 gap-8">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type</label>
-                    <select
-                      value={formData.contractType}
-                      onChange={handleChange}
-                      name="contractType"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="">Select Contract Type</option>
-                      {contractTypes.map(type => (
-                        <option key={type.id} value={type.id}>
-                          {type.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select
-                      value={document?.status || 'draft'}
-                      onChange={(e) => handleStatusChange(e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="review">Under Review</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                      <option value="expired">Expired</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Parties Information */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Parties Information</h3>
-                <div className="grid grid-cols-2 gap-8">
-                  {/* First Party */}
-                  <div>
-                    <h4 className="text-base font-medium text-gray-900 mb-4">First Party</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                        <select
-                          value={formData.parties.firstParty.companyId}
-                          onChange={handleChange}
-                          name="firstParty.companyId"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        >
-                          <option value="">Select a company</option>
-                          {mockCompanies.map(company => (
-                            <option key={company.id} value={company.id}>
-                              {company.name} ({company.type})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Representative</label>
-                        <input
-                          type="text"
-                          value={formData.parties.firstParty.representative}
-                          onChange={handleChange}
-                          name="firstParty.representative"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                        <input
-                          type="text"
-                          value={formData.parties.firstParty.position}
-                          onChange={handleChange}
-                          name="firstParty.position"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input
-                          type="email"
-                          value={formData.parties.firstParty.email}
-                          onChange={handleChange}
-                          name="firstParty.email"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input
-                          type="tel"
-                          value={formData.parties.firstParty.phone}
-                          onChange={handleChange}
-                          name="firstParty.phone"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Second Party */}
-                  <div>
-                    <h4 className="text-base font-medium text-gray-900 mb-4">Second Party</h4>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                        <select
-                          value={formData.parties.secondParty.companyId}
-                          onChange={handleChange}
-                          name="secondParty.companyId"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        >
-                          <option value="">Select a company</option>
-                          {mockCompanies.map(company => (
-                            <option key={company.id} value={company.id}>
-                              {company.name} ({company.type})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Representative</label>
-                        <input
-                          type="text"
-                          value={formData.parties.secondParty.representative}
-                          onChange={handleChange}
-                          name="secondParty.representative"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                        <input
-                          type="text"
-                          value={formData.parties.secondParty.position}
-                          onChange={handleChange}
-                          name="secondParty.position"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input
-                          type="email"
-                          value={formData.parties.secondParty.email}
-                          onChange={handleChange}
-                          name="secondParty.email"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input
-                          type="tel"
-                          value={formData.parties.secondParty.phone}
-                          onChange={handleChange}
-                          name="secondParty.phone"
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Contract Details */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Details</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input
-                      type="text"
-                      value={formData.title}
-                      onChange={handleChange}
-                      name="title"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={formData.description}
-                      onChange={handleChange}
-                      name="description"
-                      rows={4}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-8">
+            ) : (
+              <div className="w-full space-y-6">
+                {/* Contract Header */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <div className="flex justify-between items-start">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Effective Date</label>
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">CONTRACT</h1>
+                      <p className="text-gray-600">Professional Contract Document</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-8 mt-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Number</label>
+                      <input
+                        type="text"
+                        value={formData.contractNumber}
+                        onChange={handleChange}
+                        name="contractNumber"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
                       <input
                         type="date"
                         value={formData.effectiveDate}
@@ -552,190 +394,414 @@ const ContractCreator = () => {
                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
-                      <input
-                        type="date"
-                        value={formData.expirationDate}
-                        onChange={handleChange}
-                        name="expirationDate"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      />
-                    </div>
                   </div>
+                </div>
+
+                {/* Contract Type and Status */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                   <div className="grid grid-cols-2 gap-8">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
-                      <input
-                        type="number"
-                        value={formData.value}
-                        onChange={handleChange}
-                        name="value"
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contract Type</label>
                       <select
-                        value={formData.currency}
+                        value={formData.contractType}
                         onChange={handleChange}
-                        name="currency"
+                        name="contractType"
                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       >
-                        <option value="">Select Currency</option>
-                        {currencies.map(currency => (
-                          <option key={currency.code} value={currency.code}>
-                            {currency.code} - {currency.name}
+                        <option value="">Select Contract Type</option>
+                        {contractTypes.map(type => (
+                          <option key={type.id} value={type.id}>
+                            {type.name}
                           </option>
                         ))}
                       </select>
                     </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-8">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Payment Terms</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                       <select
-                        value={formData.paymentTerms}
-                        onChange={handleChange}
-                        name="paymentTerms"
+                        value={document?.status || 'draft'}
+                        onChange={(e) => handleStatusChange(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2"
                       >
-                        <option value="">Select Payment Terms</option>
-                        {paymentTerms.map(term => (
-                          <option key={term.id} value={term.id}>
-                            {term.name}
-                          </option>
-                        ))}
+                        <option value="draft">Draft</option>
+                        <option value="review">Under Review</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="expired">Expired</option>
                       </select>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Contract Terms */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Terms</h3>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Terms and Conditions</label>
-                  <textarea
-                    value={formData.termsAndConditions}
-                    onChange={handleChange}
-                    name="termsAndConditions"
-                    rows={6}
-                    placeholder="Enter contract terms and conditions..."
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-              </div>
-
-              {/* Additional Information */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Deliverables</label>
-                    <textarea
-                      value={formData.deliverables}
-                      onChange={handleChange}
-                      name="deliverables"
-                      rows={4}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Governing Law</label>
-                    <input
-                      type="text"
-                      value={formData.governingLaw}
-                      onChange={handleChange}
-                      name="governingLaw"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Jurisdiction</label>
-                    <input
-                      type="text"
-                      value={formData.jurisdiction}
-                      onChange={handleChange}
-                      name="jurisdiction"
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Termination Clause</label>
-                    <textarea
-                      value={formData.terminationClause}
-                      onChange={handleChange}
-                      name="terminationClause"
-                      rows={2}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Renewal Terms</label>
-                    <textarea
-                      value={formData.renewalTerms}
-                      onChange={handleChange}
-                      name="renewalTerms"
-                      rows={2}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Special Conditions</label>
-                    <textarea
-                      value={formData.specialConditions}
-                      onChange={handleChange}
-                      name="specialConditions"
-                      rows={2}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Attachments */}
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Upload Files
-                    </label>
-                    <input
-                      type="file"
-                      multiple
-                      onChange={handleFileChange}
-                      className="mt-1 block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-md file:border-0
-                        file:text-sm file:font-medium
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100"
-                    />
-                  </div>
-                  {formData.attachments.length > 0 && (
-                    <div className="space-y-2">
-                      {formData.attachments.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                          <span className="text-sm text-gray-600">{file.name}</span>
-                          <button
-                            type="button"
-                            onClick={() => removeAttachment(index)}
-                            className="text-red-600 hover:text-red-700"
+                {/* Parties Information */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Parties Information</h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* First Party */}
+                    <div>
+                      <h4 className="text-base font-medium text-gray-900 mb-4">First Party</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                          <select
+                            value={formData.parties.firstParty.companyId}
+                            onChange={handleChange}
+                            name="firstParty.companyId"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
                           >
-                            <X className="w-4 h-4" />
-                          </button>
+                            <option value="">Select a company</option>
+                            {mockCompanies.map(company => (
+                              <option key={company.id} value={company.id}>
+                                {company.name} ({company.type})
+                              </option>
+                            ))}
+                          </select>
                         </div>
-                      ))}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Representative</label>
+                          <input
+                            type="text"
+                            value={formData.parties.firstParty.representative}
+                            onChange={handleChange}
+                            name="firstParty.representative"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                          <input
+                            type="text"
+                            value={formData.parties.firstParty.position}
+                            onChange={handleChange}
+                            name="firstParty.position"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                          <input
+                            type="email"
+                            value={formData.parties.firstParty.email}
+                            onChange={handleChange}
+                            name="firstParty.email"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                          <input
+                            type="tel"
+                            value={formData.parties.firstParty.phone}
+                            onChange={handleChange}
+                            name="firstParty.phone"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  )}
+
+                    {/* Second Party */}
+                    <div>
+                      <h4 className="text-base font-medium text-gray-900 mb-4">Second Party</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                          <select
+                            value={formData.parties.secondParty.companyId}
+                            onChange={handleChange}
+                            name="secondParty.companyId"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          >
+                            <option value="">Select a company</option>
+                            {mockCompanies.map(company => (
+                              <option key={company.id} value={company.id}>
+                                {company.name} ({company.type})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Representative</label>
+                          <input
+                            type="text"
+                            value={formData.parties.secondParty.representative}
+                            onChange={handleChange}
+                            name="secondParty.representative"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                          <input
+                            type="text"
+                            value={formData.parties.secondParty.position}
+                            onChange={handleChange}
+                            name="secondParty.position"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                          <input
+                            type="email"
+                            value={formData.parties.secondParty.email}
+                            onChange={handleChange}
+                            name="secondParty.email"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                          <input
+                            type="tel"
+                            value={formData.parties.secondParty.phone}
+                            onChange={handleChange}
+                            name="secondParty.phone"
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contract Details */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Details</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={handleChange}
+                        name="title"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={handleChange}
+                        name="description"
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-8">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Effective Date</label>
+                        <input
+                          type="date"
+                          value={formData.effectiveDate}
+                          onChange={handleChange}
+                          name="effectiveDate"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Expiration Date</label>
+                        <input
+                          type="date"
+                          value={formData.expirationDate}
+                          onChange={handleChange}
+                          name="expirationDate"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Value</label>
+                        <input
+                          type="number"
+                          value={formData.value}
+                          onChange={handleChange}
+                          name="value"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+                        <select
+                          value={formData.currency}
+                          onChange={handleChange}
+                          name="currency"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        >
+                          <option value="">Select Currency</option>
+                          {currencies.map(currency => (
+                            <option key={currency.code} value={currency.code}>
+                              {currency.code} - {currency.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Payment Terms</label>
+                        <select
+                          value={formData.paymentTerms}
+                          onChange={handleChange}
+                          name="paymentTerms"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                        >
+                          <option value="">Select Payment Terms</option>
+                          {paymentTerms.map(term => (
+                            <option key={term.id} value={term.id}>
+                              {term.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contract Terms */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Terms</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Terms and Conditions</label>
+                    <textarea
+                      value={formData.termsAndConditions}
+                      onChange={handleChange}
+                      name="termsAndConditions"
+                      rows={6}
+                      placeholder="Enter contract terms and conditions..."
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    />
+                  </div>
+                </div>
+
+                {/* Additional Information */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Deliverables</label>
+                      <textarea
+                        value={formData.deliverables}
+                        onChange={handleChange}
+                        name="deliverables"
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Governing Law</label>
+                      <input
+                        type="text"
+                        value={formData.governingLaw}
+                        onChange={handleChange}
+                        name="governingLaw"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Jurisdiction</label>
+                      <input
+                        type="text"
+                        value={formData.jurisdiction}
+                        onChange={handleChange}
+                        name="jurisdiction"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Termination Clause</label>
+                      <textarea
+                        value={formData.terminationClause}
+                        onChange={handleChange}
+                        name="terminationClause"
+                        rows={2}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Renewal Terms</label>
+                      <textarea
+                        value={formData.renewalTerms}
+                        onChange={handleChange}
+                        name="renewalTerms"
+                        rows={2}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Special Conditions</label>
+                      <textarea
+                        value={formData.specialConditions}
+                        onChange={handleChange}
+                        name="specialConditions"
+                        rows={2}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Attachments */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Upload Files
+                      </label>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileChange}
+                        className="mt-1 block w-full text-sm text-gray-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-md file:border-0
+                          file:text-sm file:font-medium
+                          file:bg-blue-50 file:text-blue-700
+                          hover:file:bg-blue-100"
+                      />
+                    </div>
+                    {formData.attachments.length > 0 && (
+                      <div className="space-y-2">
+                        {formData.attachments.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <span className="text-sm text-gray-600">{file.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(index)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
-        </DocumentLayout>
+
+          {/* Right Sidebar */}
+          <DocumentRightSidebar
+            onPreview={handlePreview}
+            onExport={handleExport}
+            onSave={handleSave}
+            isSaving={isSaving}
+            showExportDropdown={showExportDropdown}
+            onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
+            showSaveDropdown={showSaveDropdown}
+            onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+            isCollapsed={isRightSidebarCollapsed}
+            onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
+            status={document?.status || 'draft'}
+            lastSaved={lastSaved}
+            documentType="Contract"
+          />
+        </div>
       </div>
     </div>
   );

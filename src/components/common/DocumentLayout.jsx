@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DocumentSidebarContent from './DocumentSidebarContent';
 import DocumentRightSidebar from './DocumentRightSidebar';
 import Sidebar from './Sidebar';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const DocumentLayout = ({
   title,
@@ -31,10 +32,13 @@ const DocumentLayout = ({
   onWorkspaceSelect,
   onWorkspaceFilter,
   onUnsavedChangesConfirm,
-  onUnsavedChangesCancel
+  onUnsavedChangesCancel,
+  leftSidebar,
+  isLeftSidebarCollapsed,
+  onLeftSidebarToggle,
+  isRightSidebarCollapsed,
+  onRightSidebarToggle
 }) => {
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [isRightSidebarCollapsed, setIsRightSidebarCollapsed] = useState(false);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [showSaveDropdown, setShowSaveDropdown] = useState(false);
 
@@ -43,68 +47,56 @@ const DocumentLayout = ({
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar */}
-        <Sidebar
-          isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-          width={sidebarWidth}
+    <div className="flex h-full">
+      {/* Left Sidebar */}
+      <div className={`relative ${isLeftSidebarCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 ease-in-out`}>
+        {leftSidebar}
+        <button
+          onClick={onLeftSidebarToggle}
+          className="absolute -right-3 top-4 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:bg-gray-50 z-10"
         >
-          <DocumentSidebarContent
-            document={document}
-            versions={versions}
-            currentVersion={currentVersion}
-            onVersionSelect={onVersionSelect}
-            hasUnsavedChanges={hasUnsavedChanges}
-            isCollapsed={isSidebarCollapsed}
-            onSave={onSave}
-            lastSavedState={lastSaved}
-            documentType={documentType}
-            onStatusChange={onStatusChange}
-            onCollaborationClick={onCollaborationClick}
-            onCollaboration={onCollaboration}
-            collaborators={collaborators}
-            workspaces={workspaces}
-            selectedWorkspace={selectedWorkspace}
-            onWorkspaceSelect={onWorkspaceSelect}
-            onWorkspaceFilter={onWorkspaceFilter}
-            onUnsavedChangesConfirm={onUnsavedChangesConfirm}
-            onUnsavedChangesCancel={onUnsavedChangesCancel}
-          />
-        </Sidebar>
+          {isLeftSidebarCollapsed ? (
+            <ChevronRight className="h-4 w-4 text-gray-600" />
+          ) : (
+            <ChevronLeft className="h-4 w-4 text-gray-600" />
+          )}
+        </button>
+      </div>
 
-        {/* Main Content Area */}
-        <div
-          className="flex-1 overflow-y-auto"
-          style={{
-            marginLeft: isSidebarCollapsed ? '64px' : `${sidebarWidth}px`,
-            marginRight: isRightSidebarCollapsed ? '64px' : `${rightSidebarWidth}px`,
-            transition: 'margin 300ms ease-in-out'
-          }}
-        >
-          <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+      {/* Main Content Area */}
+      <div className="flex-1 flex">
+        <div className="flex-1">
+          {children}
         </div>
 
         {/* Right Sidebar */}
-        <DocumentRightSidebar
-          onPreview={onPreview}
-          onExport={handleExport}
-          onSave={onSave}
-          isSaving={isSaving}
-          showExportDropdown={showExportDropdown}
-          onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
-          showSaveDropdown={showSaveDropdown}
-          onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
-          isCollapsed={isRightSidebarCollapsed}
-          onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
-          status={document?.status || 'draft'}
-          lastSaved={lastSaved}
-          documentType={documentType}
-        />
+        <div className={`relative ${isRightSidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
+          <DocumentRightSidebar
+            onPreview={onPreview}
+            onExport={handleExport}
+            onSave={onSave}
+            isSaving={isSaving}
+            showExportDropdown={showExportDropdown}
+            onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
+            showSaveDropdown={showSaveDropdown}
+            onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+            isCollapsed={isRightSidebarCollapsed}
+            onToggle={onRightSidebarToggle}
+            status={document?.status || 'draft'}
+            lastSaved={lastSaved}
+            documentType={documentType}
+          />
+          <button
+            onClick={onRightSidebarToggle}
+            className="absolute -left-3 top-4 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:bg-gray-50 z-10"
+          >
+            {isRightSidebarCollapsed ? (
+              <ChevronLeft className="h-4 w-4 text-gray-600" />
+            ) : (
+              <ChevronRight className="h-4 w-4 text-gray-600" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );
