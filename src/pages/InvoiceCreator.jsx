@@ -30,21 +30,24 @@ const getChanges = (oldObj, newObj, prefix = '') => {
 };
 
 // Version History Item Component
-const VersionHistoryItem = ({ version, isCurrent, onClick }) => {
+const VersionHistoryItem = ({ version, isCurrent, onClick, isCollapsed }) => {
   const getStatusColor = (isCurrent) => isCurrent ? 'bg-green-500' : 'bg-gray-300';
   
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+      className={`w-full flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors ${isCollapsed ? 'justify-center' : ''}`}
+      title={isCollapsed ? version.name : undefined}
     >
       <div className={`w-2 h-2 ${getStatusColor(isCurrent)} rounded-full`}></div>
-      <div className="flex-1 text-left">
-        <p className={`text-sm ${isCurrent ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
-          {version.name}
-        </p>
-        <p className="text-xs text-gray-500">{version.timestamp}</p>
-      </div>
+      {!isCollapsed && (
+        <div className="flex-1 text-left">
+          <p className={`text-sm ${isCurrent ? 'font-medium text-gray-900' : 'text-gray-600'}`}>
+            {version.name}
+          </p>
+          <p className="text-xs text-gray-500">{version.timestamp}</p>
+        </div>
+      )}
     </button>
   );
 };
@@ -186,7 +189,8 @@ const InvoiceSidebarContent = ({
   versions = [], 
   currentVersion,
   onVersionSelect,
-  hasUnsavedChanges
+  hasUnsavedChanges,
+  isCollapsed
 }) => {
   const [selectedWorkspaces, setSelectedWorkspaces] = useState([
     { id: 1, name: 'Current Invoice', documents: 1 }
@@ -194,9 +198,9 @@ const InvoiceSidebarContent = ({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 flex-1">
+      <div className={`p-6 flex-1 transition-all duration-300 ${isCollapsed ? 'px-3' : ''}`}>
         {/* Import Data */}
-        <div className="mb-6">
+        <div className={`mb-6 ${isCollapsed ? 'hidden' : ''}`}>
           <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
             <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
@@ -207,35 +211,38 @@ const InvoiceSidebarContent = ({
         </div>
 
         {/* Document Workspace */}
-        <DocumentWorkspace 
-          selectedWorkspaces={selectedWorkspaces}
-          onWorkspaceChange={setSelectedWorkspaces}
-        />
+        <div className={isCollapsed ? 'hidden' : ''}>
+          <DocumentWorkspace 
+            selectedWorkspaces={selectedWorkspaces}
+            onWorkspaceChange={setSelectedWorkspaces}
+          />
+        </div>
 
         {/* Version History */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-900">Version History</h3>
-            <History className="w-4 h-4 text-gray-400" />
+        <div className={`mb-6 ${isCollapsed ? 'px-0' : ''}`}>
+          <div className={`flex items-center justify-between mb-3 ${isCollapsed ? 'justify-center' : ''}`}>
+            <h3 className={`text-sm font-medium text-gray-900 ${isCollapsed ? 'hidden' : ''}`}>Version History</h3>
+            <History className={`w-4 h-4 text-gray-400 ${isCollapsed ? 'mx-auto' : ''}`} />
           </div>
-          <div className="space-y-1">
+          <div className={`space-y-1 ${isCollapsed ? 'space-y-2' : ''}`}>
             {versions.map((version) => (
               <VersionHistoryItem
                 key={version.id}
                 version={version}
                 isCurrent={version.id === currentVersion?.id}
                 onClick={() => onVersionSelect(version)}
+                isCollapsed={isCollapsed}
               />
             ))}
           </div>
         </div>
       </div>
-      <div className="border-t border-gray-200 p-4">
-        <div className="text-xs text-gray-500">
+      <div className={`border-t border-gray-200 p-4 ${isCollapsed ? 'px-2' : ''}`}>
+        <div className={`text-xs text-gray-500 ${isCollapsed ? 'text-center' : ''}`}>
           {hasUnsavedChanges ? (
-            <span className="text-yellow-600">You have unsaved changes</span>
+            <span className="text-yellow-600">{isCollapsed ? '•' : 'You have unsaved changes'}</span>
           ) : (
-            <span>All changes saved</span>
+            <span>{isCollapsed ? '✓' : 'All changes saved'}</span>
           )}
         </div>
       </div>
@@ -1084,10 +1091,11 @@ export default function InvoiceCreator() {
             currentVersion={lastSavedState}
             onVersionSelect={handleVersionSelect}
             hasUnsavedChanges={hasUnsavedChanges}
+            isCollapsed={isSidebarCollapsed}
           />
         </Sidebar>
         
-        <div className={`flex-1 transition-all duration-300`}>
+        <div className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : ''}`}>
           <div className="flex h-full">
             <div className="flex-1 p-6 overflow-y-auto">
               {error ? (
