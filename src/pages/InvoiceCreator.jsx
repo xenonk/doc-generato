@@ -457,7 +457,6 @@ const InvoiceSidebarContent = ({
 
         {/* Document Workspace */}
         <div className={isCollapsed ? '' : 'mb-6'}>
-          {!isCollapsed && <h3 className="text-sm font-medium text-gray-900 mb-3">Document Workspace</h3>}
           <DocumentWorkspace 
             selectedWorkspaces={selectedWorkspaces}
             onWorkspaceChange={setSelectedWorkspaces}
