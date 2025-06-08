@@ -18,6 +18,7 @@ import { useQuery } from 'react-query';
 import { documentService } from '../services/documentService';
 import { toast } from 'react-hot-toast';
 import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 
 const DocumentTypeCard = ({ doc, onClick }) => {
   const IconComponent = doc.icon;
@@ -168,184 +169,167 @@ export default function Dashboard() {
       <Header />
 
       <div className="flex">
-        {/* Sidebar Container */}
-        <div className="relative">
-          {/* Sidebar */}
-          <aside 
-            className={`bg-white border-r border-gray-200 min-h-[calc(100vh-50px)] transition-all duration-300 ${
-              isSidebarCollapsed ? 'w-16' : 'w-64'
-            }`}
-          >
-            <nav className={`p-4 space-y-2 ${isSidebarCollapsed ? 'px-2' : ''}`}>
-              {[
-                { name: 'Dashboard', icon: Home, active: true },
-                { name: 'Document Sets', icon: Layers, active: false },
-                { name: 'Create Document', icon: FileText, active: false },
-                { name: 'My Documents', icon: FolderOpen, active: false },
-                { name: 'Shared', icon: Share2, active: false },
-                { name: 'Templates', icon: FileText, active: false },
-                { name: 'Analytics', icon: BarChart3, active: false }
-              ].map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <button
-                    key={item.name}
-                    className={`w-full flex items-center ${
-                      isSidebarCollapsed ? 'justify-center' : 'space-x-3'
-                    } px-3 py-2 rounded-lg text-left transition-colors ${
-                      item.active
-                        ? 'bg-blue-600 text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
-                    }`}
-                    title={isSidebarCollapsed ? item.name : ''}
-                  >
-                    <IconComponent className="w-5 h-5" />
-                    {!isSidebarCollapsed && (
-                      <span className="text-sm font-medium">{item.name}</span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
-          </aside>
-
-          {/* Sidebar Toggle Button */}
-          <button
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="absolute -right-3 top-6 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm z-10"
-          >
-            {isSidebarCollapsed ? (
-              <ChevronRight className="w-3.5 h-3.5" />
-            ) : (
-              <ChevronLeft className="w-3.5 h-3.5" />
-            )}
-          </button>
-        </div>
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed}
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        >
+          <nav className={`p-4 space-y-2 ${isSidebarCollapsed ? 'px-2' : ''}`}>
+            {[
+              { name: 'Dashboard', icon: Home, active: true },
+              { name: 'Document Sets', icon: Layers, active: false },
+              { name: 'Create Document', icon: FileText, active: false },
+              { name: 'My Documents', icon: FolderOpen, active: false },
+              { name: 'Shared', icon: Share2, active: false },
+              { name: 'Templates', icon: FileText, active: false },
+              { name: 'Analytics', icon: BarChart3, active: false }
+            ].map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  className={`w-full flex items-center ${
+                    isSidebarCollapsed ? 'justify-center' : 'space-x-3'
+                  } px-3 py-2 rounded-lg text-left transition-colors ${
+                    item.active
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                  title={isSidebarCollapsed ? item.name : ''}
+                >
+                  <IconComponent className="w-5 h-5" />
+                  {!isSidebarCollapsed && (
+                    <span className="text-sm font-medium">{item.name}</span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </Sidebar>
 
         {/* Main Content */}
-        <main className={`flex-1 p-6 transition-all duration-300 ${
-          isSidebarCollapsed ? 'ml-16' : 'ml-64'
-        }`}>
-          <div className="space-y-8">
-            {/* Quick Document Creation */}
-            <section>
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Quick Document Creation</h2>
-                <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  <Plus className="w-4 h-4" />
-                  <span>Custom Template</span>
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {Object.values(DOCUMENT_TYPES).map((doc) => (
-                  <DocumentTypeCard
-                    key={doc.id}
-                    doc={doc}
-                    onClick={handleDocumentCreate}
-                  />
-                ))}
-              </div>
-            </section>
+        <main className={`flex-1 transition-all duration-300`}>
+          <div className="p-6 h-full">
+            <div className="space-y-8 w-full">
+              {/* Quick Document Creation */}
+              <section>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Quick Document Creation</h2>
+                  <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <Plus className="w-4 h-4" />
+                    <span>Custom Template</span>
+                  </button>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {Object.values(DOCUMENT_TYPES).map((doc) => (
+                    <DocumentTypeCard
+                      key={doc.id}
+                      doc={doc}
+                      onClick={handleDocumentCreate}
+                    />
+                  ))}
+                </div>
+              </section>
 
-            {/* Recent Documents */}
-            <section>
-              <div className="bg-white rounded-lg border border-gray-200">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">Recent Documents</h3>
-                    <div className="flex items-center space-x-2">
-                      <Filter className="w-4 h-4 text-gray-400" />
-                      <select className="text-sm border-gray-300 rounded-md">
-                        <option>Sort by: Modified</option>
-                        <option>Sort by: Name</option>
-                        <option>Sort by: Type</option>
-                      </select>
+              {/* Recent Documents */}
+              <section>
+                <div className="bg-white rounded-lg border border-gray-200 w-full">
+                  <div className="p-6 border-b border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Recent Documents</h3>
+                      <div className="flex items-center space-x-2">
+                        <Filter className="w-4 h-4 text-gray-400" />
+                        <select className="text-sm border-gray-300 rounded-md">
+                          <option>Sort by: Modified</option>
+                          <option>Sort by: Name</option>
+                          <option>Sort by: Type</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {['All', 'My Documents', 'Draft', 'Completed', 'Approval Awaiting'].map((tab) => (
+                        <button
+                          key={tab}
+                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                            selectedTab === tab
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
+                          onClick={() => setSelectedTab(tab)}
+                        >
+                          {tab}
+                          {tab === 'Approval Awaiting' && (
+                            <span className="ml-1 px-1.5 py-0.5 bg-orange-200 text-orange-800 text-xs rounded-full">
+                              {recentDocuments.filter(doc => doc.status === 'approval_awaiting').length}
+                            </span>
+                          )}
+                        </button>
+                      ))}
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap gap-2 mt-4">
-                    {['All', 'My Documents', 'Draft', 'Completed', 'Approval Awaiting'].map((tab) => (
-                      <button
-                        key={tab}
-                        className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                          selectedTab === tab
-                            ? 'bg-blue-100 text-blue-700'
-                            : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                        onClick={() => setSelectedTab(tab)}
-                      >
-                        {tab}
-                        {tab === 'Approval Awaiting' && (
-                          <span className="ml-1 px-1.5 py-0.5 bg-orange-200 text-orange-800 text-xs rounded-full">
-                            {recentDocuments.filter(doc => doc.status === 'approval_awaiting').length}
-                          </span>
-                        )}
-                      </button>
-                    ))}
+                  <div className="divide-y divide-gray-200">
+                    {isLoadingDocuments ? (
+                      <div className="p-4 text-center text-gray-500">Loading documents...</div>
+                    ) : filteredDocuments.length === 0 ? (
+                      <div className="p-4 text-center text-gray-500">No documents found</div>
+                    ) : (
+                      filteredDocuments.map((doc) => (
+                        <RecentDocumentItem 
+                          key={doc.id} 
+                          doc={doc} 
+                          onClick={handleDocumentClick}
+                        />
+                      ))
+                    )}
                   </div>
                 </div>
-                
-                <div className="divide-y divide-gray-200">
-                  {isLoadingDocuments ? (
-                    <div className="p-4 text-center text-gray-500">Loading documents...</div>
-                  ) : filteredDocuments.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">No documents found</div>
-                  ) : (
-                    filteredDocuments.map((doc) => (
-                      <RecentDocumentItem 
-                        key={doc.id} 
-                        doc={doc} 
-                        onClick={handleDocumentClick}
-                      />
-                    ))
-                  )}
-                </div>
-              </div>
-            </section>
+              </section>
 
-            {/* Document Analytics */}
-            <section>
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Document Analytics</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {[
-                  {
-                    title: 'Documents Created',
-                    value: '127',
-                    change: '+12%',
-                    changeType: 'positive',
-                    subtitle: 'from last month',
-                    color: 'bg-blue-50 text-blue-600'
-                  },
-                  {
-                    title: 'Templates Used',
-                    value: '43',
-                    change: '+8%',
-                    changeType: 'positive',
-                    subtitle: 'from last month',
-                    color: 'bg-green-50 text-green-600'
-                  },
-                  {
-                    title: 'Time Saved',
-                    value: '24h',
-                    change: '+15%',
-                    changeType: 'positive',
-                    subtitle: 'efficiency',
-                    color: 'bg-purple-50 text-purple-600'
-                  },
-                  {
-                    title: 'Shared Documents',
-                    value: '89',
-                    change: '+5%',
-                    changeType: 'positive',
-                    subtitle: 'from last month',
-                    color: 'bg-orange-50 text-orange-600'
-                  }
-                ].map((metric, index) => (
-                  <AnalyticsCard key={index} metric={metric} />
-                ))}
-              </div>
-            </section>
+              {/* Document Analytics */}
+              <section>
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Document Analytics</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {[
+                    {
+                      title: 'Documents Created',
+                      value: '127',
+                      change: '+12%',
+                      changeType: 'positive',
+                      subtitle: 'from last month',
+                      color: 'bg-blue-50 text-blue-600'
+                    },
+                    {
+                      title: 'Templates Used',
+                      value: '43',
+                      change: '+8%',
+                      changeType: 'positive',
+                      subtitle: 'from last month',
+                      color: 'bg-green-50 text-green-600'
+                    },
+                    {
+                      title: 'Time Saved',
+                      value: '24h',
+                      change: '+15%',
+                      changeType: 'positive',
+                      subtitle: 'efficiency',
+                      color: 'bg-purple-50 text-purple-600'
+                    },
+                    {
+                      title: 'Shared Documents',
+                      value: '89',
+                      change: '+5%',
+                      changeType: 'positive',
+                      subtitle: 'from last month',
+                      color: 'bg-orange-50 text-orange-600'
+                    }
+                  ].map((metric, index) => (
+                    <AnalyticsCard key={index} metric={metric} />
+                  ))}
+                </div>
+              </section>
+            </div>
           </div>
         </main>
       </div>

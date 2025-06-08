@@ -9,9 +9,10 @@ import {
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
 import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
 
-// Sidebar Component
-const Sidebar = ({ onSaveAsDraft }) => {
+// Invoice Sidebar Content Component
+const InvoiceSidebarContent = ({ onSaveAsDraft }) => {
   const [workspaces] = useState([
     { id: 1, name: 'Current Invoice', active: true },
     { id: 2, name: 'Q1 2024 Invoices', active: false },
@@ -19,46 +20,44 @@ const Sidebar = ({ onSaveAsDraft }) => {
   ]);
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 h-screen">
-      <div className="p-6">
-        {/* Import Data */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-            <p className="text-sm text-gray-600">Drop XLSX file here or</p>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
-            <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls</p>
-          </div>
+    <div className="p-6">
+      {/* Import Data */}
+      <div className="mb-6">
+        <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>
+        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+          <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+          <p className="text-sm text-gray-600">Drop XLSX file here or</p>
+          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
+          <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls</p>
         </div>
-
-        {/* Document Workspace */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Document Workspace</h3>
-          <div className="space-y-2">
-            {workspaces.map(workspace => (
-              <div key={workspace.id} className={`p-3 rounded-lg cursor-pointer ${workspace.active ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'}`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-900">{workspace.name}</span>
-                  {workspace.active && <div className="w-2 h-2 bg-blue-600 rounded-full"></div>}
-                </div>
-              </div>
-            ))}
-            <button className="w-full p-3 border border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400">
-              <Plus className="w-4 h-4 inline mr-2" />
-              Add to Workspace
-            </button>
-          </div>
-        </div>
-
-        {/* Save as Draft */}
-        <button
-          onClick={onSaveAsDraft}
-          className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
-        >
-          Save as Draft
-        </button>
       </div>
+
+      {/* Document Workspace */}
+      <div className="mb-6">
+        <h3 className="text-sm font-medium text-gray-900 mb-3">Document Workspace</h3>
+        <div className="space-y-2">
+          {workspaces.map(workspace => (
+            <div key={workspace.id} className={`p-3 rounded-lg cursor-pointer ${workspace.active ? 'bg-blue-50 border border-blue-200' : 'hover:bg-gray-50'}`}>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-900">{workspace.name}</span>
+                {workspace.active && <div className="w-2 h-2 bg-blue-600 rounded-full"></div>}
+              </div>
+            </div>
+          ))}
+          <button className="w-full p-3 border border-dashed border-gray-300 rounded-lg text-sm text-gray-600 hover:border-gray-400">
+            <Plus className="w-4 h-4 inline mr-2" />
+            Add to Workspace
+          </button>
+        </div>
+      </div>
+
+      {/* Save as Draft */}
+      <button
+        onClick={onSaveAsDraft}
+        className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
+      >
+        Save as Draft
+      </button>
     </div>
   );
 };
@@ -85,7 +84,7 @@ const InvoiceForm = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {/* Invoice Header Block */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex justify-between items-start">
@@ -429,6 +428,7 @@ export default function InvoiceCreator() {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const [invoice, setInvoice] = useState({
     number: 'INV-2024-001',
@@ -648,36 +648,45 @@ export default function InvoiceCreator() {
       <Header />
       
       <div className="flex">
-        <Sidebar onSaveAsDraft={handleSaveAsDraft} />
+        <Sidebar 
+          isCollapsed={isSidebarCollapsed}
+          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        >
+          <InvoiceSidebarContent onSaveAsDraft={handleSaveAsDraft} />
+        </Sidebar>
         
-        <div className="flex-1 p-8">
-          {error ? (
-            <div className="text-center">
-              <div className="text-red-600 text-xl mb-4">
-                Failed to load data
+        <div className={`flex-1 transition-all duration-300`}>
+          <div className="p-6 h-full">
+            {error ? (
+              <div className="text-center">
+                <div className="text-red-600 text-xl mb-4">
+                  Failed to load data
+                </div>
+                <p className="text-gray-600 mb-4">{error.message}</p>
+                <button
+                  onClick={() => navigate('/dashboard')}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                >
+                  Go Back to Dashboard
+                </button>
               </div>
-              <p className="text-gray-600 mb-4">{error.message}</p>
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              >
-                Go Back to Dashboard
-              </button>
-            </div>
-          ) : (
-            <InvoiceForm
-              invoice={invoice}
-              companies={companies}
-              contracts={contracts}
-              onFieldChange={handleFieldChange}
-              onContractChange={handleContractChange}
-              onCompanyChange={handleCompanyChange}
-              onAddItem={addItem}
-              onUpdateItem={updateItem}
-              onRemoveItem={removeItem}
-              isSaving={isCreating || isUpdating}
-            />
-          )}
+            ) : (
+              <div className="w-full">
+                <InvoiceForm
+                  invoice={invoice}
+                  companies={companies}
+                  contracts={contracts}
+                  onFieldChange={handleFieldChange}
+                  onContractChange={handleContractChange}
+                  onCompanyChange={handleCompanyChange}
+                  onAddItem={addItem}
+                  onUpdateItem={updateItem}
+                  onRemoveItem={removeItem}
+                  isSaving={isCreating || isUpdating}
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
