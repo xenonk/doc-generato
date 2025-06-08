@@ -193,39 +193,152 @@ const InvoiceSidebarContent = ({
   ]);
 
   return (
-    <div className="p-6">
-      {/* Import Data */}
-      <div className="mb-6">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-          <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-          <p className="text-sm text-gray-600">Drop XLSX file here or</p>
-          <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
-          <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls</p>
+    <div className="flex flex-col h-full">
+      <div className="p-6 flex-1">
+        {/* Import Data */}
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+            <p className="text-sm text-gray-600">Drop XLSX file here or</p>
+            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
+            <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls</p>
+          </div>
+        </div>
+
+        {/* Document Workspace */}
+        <DocumentWorkspace 
+          selectedWorkspaces={selectedWorkspaces}
+          onWorkspaceChange={setSelectedWorkspaces}
+        />
+
+        {/* Version History */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-gray-900">Version History</h3>
+            <History className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="space-y-1">
+            {versions.map((version) => (
+              <VersionHistoryItem
+                key={version.id}
+                version={version}
+                isCurrent={version.id === currentVersion?.id}
+                onClick={() => onVersionSelect(version)}
+              />
+            ))}
+          </div>
         </div>
       </div>
-
-      {/* Document Workspace */}
-      <DocumentWorkspace 
-        selectedWorkspaces={selectedWorkspaces}
-        onWorkspaceChange={setSelectedWorkspaces}
-      />
-
-      {/* Version History */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-medium text-gray-900">Version History</h3>
-          <History className="w-4 h-4 text-gray-400" />
+      <div className="border-t border-gray-200 p-4">
+        <div className="text-xs text-gray-500">
+          {hasUnsavedChanges ? (
+            <span className="text-yellow-600">You have unsaved changes</span>
+          ) : (
+            <span>All changes saved</span>
+          )}
         </div>
-        <div className="space-y-1">
-          {versions.map((version) => (
-            <VersionHistoryItem
-              key={version.id}
-              version={version}
-              isCurrent={version.id === currentVersion?.id}
-              onClick={() => onVersionSelect(version)}
-            />
-          ))}
+      </div>
+    </div>
+  );
+};
+
+// Right Sidebar Action Bar Component
+const RightSidebar = ({ 
+  onPreview, 
+  onExport, 
+  onSave, 
+  isSaving,
+  showExportDropdown,
+  onExportDropdownToggle,
+  showSaveDropdown,
+  onSaveDropdownToggle
+}) => {
+  return (
+    <div className="w-40 bg-white border-l border-gray-200 h-full flex flex-col">
+      <div className="p-4 space-y-4 flex-1">
+        <h3 className="text-sm font-medium text-gray-900">Actions</h3>
+        <div className="space-y-3">
+          <button
+            onClick={onPreview}
+            className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center space-x-2"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Preview</span>
+          </button>
+          <div className="relative">
+            <button
+              onClick={onExportDropdownToggle}
+              className="w-full bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-green-700"
+            >
+              <Download className="w-4 h-4" />
+              <span>Export</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showExportDropdown && (
+              <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                <div className="py-1">
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Generate PDF</span>
+                  </button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                    <FileText className="w-4 h-4" />
+                    <span>Generate DOCX</span>
+                  </button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                    <FileJson className="w-4 h-4" />
+                    <span>Export JSON</span>
+                  </button>
+                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    <span>Export XLSX</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <button
+              onClick={onSaveDropdownToggle}
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700"
+              disabled={isSaving}
+            >
+              <span>{isSaving ? 'Saving...' : 'Save'}</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+            {showSaveDropdown && (
+              <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                <div className="py-1">
+                  <button 
+                    onClick={() => {
+                      onSave('final');
+                      onSaveDropdownToggle();
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Save as Final</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      onSave('draft');
+                      onSaveDropdownToggle();
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Save as Draft</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-gray-200 p-4">
+        <div className="text-xs text-gray-500">
+          Last saved: {new Date().toLocaleTimeString()}
         </div>
       </div>
     </div>
@@ -263,81 +376,6 @@ const InvoiceForm = ({
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">INVOICE</h1>
             <p className="text-gray-600">Professional Invoice Document</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button
-              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
-            >
-              Preview
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowGenerateDropdown(!showGenerateDropdown)}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700"
-              >
-                <Download className="w-4 h-4" />
-                <span>Export</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              {showGenerateDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                  <div className="py-1">
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                      <FileText className="w-4 h-4" />
-                      <span>Generate PDF</span>
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                      <FileText className="w-4 h-4" />
-                      <span>Generate DOCX</span>
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                      <FileJson className="w-4 h-4" />
-                      <span>Export JSON</span>
-                    </button>
-                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                      <FileSpreadsheet className="w-4 h-4" />
-                      <span>Export XLSX</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowSaveDropdown(!showSaveDropdown)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-blue-700"
-                disabled={isSaving}
-              >
-                <span>{isSaving ? 'Saving...' : 'Save'}</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-              {showSaveDropdown && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                  <div className="py-1">
-                    <button 
-                      onClick={() => {
-                        onSave('final');
-                        setShowSaveDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>Save as Final</span>
-                    </button>
-                    <button 
-                      onClick={() => {
-                        onSave('draft');
-                        setShowSaveDropdown(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                    >
-                      <FileText className="w-4 h-4" />
-                      <span>Save as Draft</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
           </div>
         </div>
 
@@ -756,6 +794,8 @@ export default function InvoiceCreator() {
   const [selectedVersion, setSelectedVersion] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedState, setLastSavedState] = useState(null);
+  const [showGenerateDropdown, setShowGenerateDropdown] = useState(false);
+  const [showSaveDropdown, setShowSaveDropdown] = useState(false);
 
   const [invoice, setInvoice] = useState({
     number: 'INV-2024-001',
@@ -1033,10 +1073,11 @@ export default function InvoiceCreator() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className="flex">
+      <div className="flex h-[calc(100vh-64px)]">
         <Sidebar 
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+          className="bg-white border-r border-gray-200"
         >
           <InvoiceSidebarContent 
             versions={versions}
@@ -1047,37 +1088,51 @@ export default function InvoiceCreator() {
         </Sidebar>
         
         <div className={`flex-1 transition-all duration-300`}>
-          <div className="p-6 h-full">
-            {error ? (
-              <div className="text-center">
-                <div className="text-red-600 text-xl mb-4">
-                  Failed to load data
+          <div className="flex h-full">
+            <div className="flex-1 p-6 overflow-y-auto">
+              {error ? (
+                <div className="text-center">
+                  <div className="text-red-600 text-xl mb-4">
+                    Failed to load data
+                  </div>
+                  <p className="text-gray-600 mb-4">{error.message}</p>
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Go Back to Dashboard
+                  </button>
                 </div>
-                <p className="text-gray-600 mb-4">{error.message}</p>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  Go Back to Dashboard
-                </button>
-              </div>
-            ) : (
-              <div className="w-full">
-                <InvoiceForm
-                  invoice={invoice}
-                  companies={companies}
-                  contracts={contracts}
-                  onFieldChange={handleFieldChange}
-                  onContractChange={handleContractChange}
-                  onCompanyChange={handleCompanyChange}
-                  onAddItem={addItem}
-                  onUpdateItem={updateItem}
-                  onRemoveItem={removeItem}
-                  onSave={handleSave}
-                  isSaving={isCreating || isUpdating}
-                />
-              </div>
-            )}
+              ) : (
+                <div className="w-full">
+                  <InvoiceForm
+                    invoice={invoice}
+                    companies={companies}
+                    contracts={contracts}
+                    onFieldChange={handleFieldChange}
+                    onContractChange={handleContractChange}
+                    onCompanyChange={handleCompanyChange}
+                    onAddItem={addItem}
+                    onUpdateItem={updateItem}
+                    onRemoveItem={removeItem}
+                    onSave={handleSave}
+                    isSaving={isCreating || isUpdating}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Right Sidebar */}
+            <RightSidebar
+              onPreview={() => {/* Handle preview */}}
+              onExport={() => setShowGenerateDropdown(!showGenerateDropdown)}
+              onSave={handleSave}
+              isSaving={isCreating || isUpdating}
+              showExportDropdown={showGenerateDropdown}
+              onExportDropdownToggle={() => setShowGenerateDropdown(!showGenerateDropdown)}
+              showSaveDropdown={showSaveDropdown}
+              onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+            />
           </div>
         </div>
       </div>
