@@ -5,7 +5,7 @@ import { toast } from 'react-hot-toast';
 import { 
   ChevronDown, Upload, Plus, Trash2, FileText, 
   Download, FileJson, FileSpreadsheet, Settings, Moon, LogOut, User, Building2, Mail, History,
-  Search, X
+  Search, X, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
@@ -409,9 +409,13 @@ const InvoiceSidebarContent = ({
       <div className={`border-t border-gray-200 p-4 ${isCollapsed ? 'px-2' : ''}`}>
         <div className={`text-xs text-gray-500 ${isCollapsed ? 'text-center' : ''}`}>
           {hasUnsavedChanges ? (
-            <span className="text-yellow-600">{isCollapsed ? '•' : 'You have unsaved changes'}</span>
+            <div className="flex items-center justify-center">
+              <AlertCircle className="w-7 h-7 text-yellow-500" title="You have unsaved changes" />
+            </div>
           ) : (
-            <span>{isCollapsed ? '✓' : 'All changes saved'}</span>
+            <div className="flex items-center justify-center">
+              <CheckCircle2 className="w-7 h-7 text-green-500" title="All changes saved" />
+            </div>
           )}
         </div>
       </div>
