@@ -33,7 +33,7 @@ Add request/response interceptors
 
 Migration Strategy
 Phase 1 (Foundation):
-Migrate to Vite
+Migrate to Next.js
 Implement TypeScript
 Set up new development environment
 
