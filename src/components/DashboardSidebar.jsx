@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { 
-  Clock, Star, Users, Bell, 
-  FileText, AlertCircle, CheckCircle, 
-  ChevronDown, ChevronUp,
+  Clock, Star, Users,
+  FileText, ChevronDown, ChevronUp,
   Share2
 } from 'lucide-react';
-import NotificationDrawer from './NotificationDrawer';
 
 const DashboardSidebar = ({ isCollapsed }) => {
   const [expandedSections, setExpandedSections] = useState({
     quickStats: true,
     recentActivity: true,
     teamActivity: true,
-    collections: true,
-    notifications: true
+    collections: true
   });
-  const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = useState(false);
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({
@@ -24,23 +20,18 @@ const DashboardSidebar = ({ isCollapsed }) => {
     }));
   };
 
-  const SectionHeader = ({ title, icon: Icon, section, onClick, badge }) => (
+  const SectionHeader = ({ title, icon: Icon, section }) => (
     <button
-      onClick={onClick || (() => toggleSection(section))}
+      onClick={() => toggleSection(section)}
       className={`w-full flex items-center justify-between p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg ${
         isCollapsed ? 'justify-center' : ''
       }`}
     >
       <div className="flex items-center space-x-2">
-        <div className="relative">
-          <Icon className="w-4 h-4" />
-          {badge && (
-            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          )}
-        </div>
+        <Icon className="w-4 h-4" />
         {!isCollapsed && <span>{title}</span>}
       </div>
-      {!isCollapsed && !onClick && (
+      {!isCollapsed && (
         expandedSections[section] ? 
           <ChevronUp className="w-4 h-4" /> : 
           <ChevronDown className="w-4 h-4" />
@@ -119,74 +110,36 @@ const DashboardSidebar = ({ isCollapsed }) => {
     </div>
   );
 
-  const Notifications = () => (
-    <div className="space-y-2 p-2">
-      {[1, 2, 3].map((_, i) => (
-        <div 
-          key={i} 
-          className="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
-          onClick={() => setIsNotificationDrawerOpen(true)}
-        >
-          <Bell className="w-4 h-4 text-blue-500 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-gray-600">New comment on Invoice</p>
-            <p className="text-xs text-gray-400">5 minutes ago</p>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-
   return (
-    <>
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 space-y-4">
-            {/* Quick Stats */}
-            <div>
-              <SectionHeader title="Quick Stats" icon={Clock} section="quickStats" />
-              {expandedSections.quickStats && !isCollapsed && <QuickStats />}
-            </div>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 space-y-4">
+          {/* Quick Stats */}
+          <div>
+            <SectionHeader title="Quick Stats" icon={Clock} section="quickStats" />
+            {expandedSections.quickStats && !isCollapsed && <QuickStats />}
+          </div>
 
-            {/* Recent Activity */}
-            <div>
-              <SectionHeader title="Recent Activity" icon={FileText} section="recentActivity" />
-              {expandedSections.recentActivity && !isCollapsed && <RecentActivity />}
-            </div>
+          {/* Recent Activity */}
+          <div>
+            <SectionHeader title="Recent Activity" icon={FileText} section="recentActivity" />
+            {expandedSections.recentActivity && !isCollapsed && <RecentActivity />}
+          </div>
 
-            {/* Team Activity */}
-            <div>
-              <SectionHeader title="Team Activity" icon={Users} section="teamActivity" />
-              {expandedSections.teamActivity && !isCollapsed && <TeamActivity />}
-            </div>
+          {/* Team Activity */}
+          <div>
+            <SectionHeader title="Team Activity" icon={Users} section="teamActivity" />
+            {expandedSections.teamActivity && !isCollapsed && <TeamActivity />}
+          </div>
 
-            {/* Collections */}
-            <div>
-              <SectionHeader title="Collections" icon={Star} section="collections" />
-              {expandedSections.collections && !isCollapsed && <Collections />}
-            </div>
-
-            {/* Notifications */}
-            <div>
-              <SectionHeader 
-                title="Notifications" 
-                icon={Bell} 
-                section="notifications"
-                onClick={() => setIsNotificationDrawerOpen(true)}
-                badge={true}
-              />
-              {expandedSections.notifications && !isCollapsed && <Notifications />}
-            </div>
+          {/* Collections */}
+          <div>
+            <SectionHeader title="Collections" icon={Star} section="collections" />
+            {expandedSections.collections && !isCollapsed && <Collections />}
           </div>
         </div>
       </div>
-
-      {/* Notification Drawer */}
-      <NotificationDrawer
-        isOpen={isNotificationDrawerOpen}
-        onClose={() => setIsNotificationDrawerOpen(false)}
-      />
-    </>
+    </div>
   );
 };
 
