@@ -1,0 +1,193 @@
+import React, { useState } from 'react';
+import { 
+  Clock, Star, Users, Bell, 
+  FileText, AlertCircle, CheckCircle, 
+  ChevronDown, ChevronUp,
+  Share2
+} from 'lucide-react';
+import NotificationDrawer from './NotificationDrawer';
+
+const DashboardSidebar = ({ isCollapsed }) => {
+  const [expandedSections, setExpandedSections] = useState({
+    quickStats: true,
+    recentActivity: true,
+    teamActivity: true,
+    collections: true,
+    notifications: true
+  });
+  const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = useState(false);
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const SectionHeader = ({ title, icon: Icon, section, onClick, badge }) => (
+    <button
+      onClick={onClick || (() => toggleSection(section))}
+      className={`w-full flex items-center justify-between p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg ${
+        isCollapsed ? 'justify-center' : ''
+      }`}
+    >
+      <div className="flex items-center space-x-2">
+        <div className="relative">
+          <Icon className="w-4 h-4" />
+          {badge && (
+            <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+          )}
+        </div>
+        {!isCollapsed && <span>{title}</span>}
+      </div>
+      {!isCollapsed && !onClick && (
+        expandedSections[section] ? 
+          <ChevronUp className="w-4 h-4" /> : 
+          <ChevronDown className="w-4 h-4" />
+      )}
+    </button>
+  );
+
+  const QuickStats = () => (
+    <div className="space-y-2 p-2">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-blue-50 p-2 rounded-lg">
+          <div className="text-xs text-blue-600">Pending</div>
+          <div className="text-lg font-semibold text-blue-700">12</div>
+        </div>
+        <div className="bg-green-50 p-2 rounded-lg">
+          <div className="text-xs text-green-600">Due Today</div>
+          <div className="text-lg font-semibold text-green-700">3</div>
+        </div>
+        <div className="bg-purple-50 p-2 rounded-lg">
+          <div className="text-xs text-purple-600">Active</div>
+          <div className="text-lg font-semibold text-purple-700">8</div>
+        </div>
+        <div className="bg-orange-50 p-2 rounded-lg">
+          <div className="text-xs text-orange-600">Reviews</div>
+          <div className="text-lg font-semibold text-orange-700">5</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const RecentActivity = () => (
+    <div className="space-y-2 p-2">
+      {[1, 2, 3].map((_, i) => (
+        <div key={i} className="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded-lg">
+          <div className="w-2 h-2 mt-1.5 bg-blue-500 rounded-full"></div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-600 truncate">Invoice INV-2024-001 updated</p>
+            <p className="text-xs text-gray-400">2 hours ago</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const TeamActivity = () => (
+    <div className="space-y-2 p-2">
+      {[1, 2, 3].map((_, i) => (
+        <div key={i} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg">
+          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+            <Users className="w-4 h-4 text-gray-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-600 truncate">John Smith</p>
+            <p className="text-xs text-gray-400">Editing Invoice</p>
+          </div>
+          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const Collections = () => (
+    <div className="space-y-2 p-2">
+      <button className="w-full flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-600">
+        <Star className="w-4 h-4 text-yellow-500" />
+        <span>Starred Documents</span>
+      </button>
+      <button className="w-full flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-600">
+        <Share2 className="w-4 h-4 text-blue-500" />
+        <span>Shared with Me</span>
+      </button>
+      <button className="w-full flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-600">
+        <FileText className="w-4 h-4 text-gray-500" />
+        <span>My Drafts</span>
+      </button>
+    </div>
+  );
+
+  const Notifications = () => (
+    <div className="space-y-2 p-2">
+      {[1, 2, 3].map((_, i) => (
+        <div 
+          key={i} 
+          className="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+          onClick={() => setIsNotificationDrawerOpen(true)}
+        >
+          <Bell className="w-4 h-4 text-blue-500 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-gray-600">New comment on Invoice</p>
+            <p className="text-xs text-gray-400">5 minutes ago</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  return (
+    <>
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-4 space-y-4">
+            {/* Quick Stats */}
+            <div>
+              <SectionHeader title="Quick Stats" icon={Clock} section="quickStats" />
+              {expandedSections.quickStats && !isCollapsed && <QuickStats />}
+            </div>
+
+            {/* Recent Activity */}
+            <div>
+              <SectionHeader title="Recent Activity" icon={FileText} section="recentActivity" />
+              {expandedSections.recentActivity && !isCollapsed && <RecentActivity />}
+            </div>
+
+            {/* Team Activity */}
+            <div>
+              <SectionHeader title="Team Activity" icon={Users} section="teamActivity" />
+              {expandedSections.teamActivity && !isCollapsed && <TeamActivity />}
+            </div>
+
+            {/* Collections */}
+            <div>
+              <SectionHeader title="Collections" icon={Star} section="collections" />
+              {expandedSections.collections && !isCollapsed && <Collections />}
+            </div>
+
+            {/* Notifications */}
+            <div>
+              <SectionHeader 
+                title="Notifications" 
+                icon={Bell} 
+                section="notifications"
+                onClick={() => setIsNotificationDrawerOpen(true)}
+                badge={true}
+              />
+              {expandedSections.notifications && !isCollapsed && <Notifications />}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Notification Drawer */}
+      <NotificationDrawer
+        isOpen={isNotificationDrawerOpen}
+        onClose={() => setIsNotificationDrawerOpen(false)}
+      />
+    </>
+  );
+};
+
+export default DashboardSidebar; 

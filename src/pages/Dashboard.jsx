@@ -19,6 +19,7 @@ import { documentService } from '../services/documentService';
 import { toast } from 'react-hot-toast';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
+import DashboardSidebar from '../components/DashboardSidebar';
 
 const DocumentTypeCard = ({ doc, onClick }) => {
   const IconComponent = doc.icon;
@@ -173,37 +174,7 @@ export default function Dashboard() {
           isCollapsed={isSidebarCollapsed}
           onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         >
-          <nav className={`p-4 space-y-2 ${isSidebarCollapsed ? 'px-2' : ''}`}>
-            {[
-              { name: 'Dashboard', icon: Home, active: true },
-              { name: 'Document Sets', icon: Layers, active: false },
-              { name: 'Create Document', icon: FileText, active: false },
-              { name: 'My Documents', icon: FolderOpen, active: false },
-              { name: 'Shared', icon: Share2, active: false },
-              { name: 'Templates', icon: FileText, active: false },
-              { name: 'Analytics', icon: BarChart3, active: false }
-            ].map((item) => {
-              const IconComponent = item.icon;
-              return (
-                <button
-                  key={item.name}
-                  className={`w-full flex items-center ${
-                    isSidebarCollapsed ? 'justify-center' : 'space-x-3'
-                  } px-3 py-2 rounded-lg text-left transition-colors ${
-                    item.active
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                  title={isSidebarCollapsed ? item.name : ''}
-                >
-                  <IconComponent className="w-5 h-5" />
-                  {!isSidebarCollapsed && (
-                    <span className="text-sm font-medium">{item.name}</span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
+          <DashboardSidebar isCollapsed={isSidebarCollapsed} />
         </Sidebar>
 
         {/* Main Content */}

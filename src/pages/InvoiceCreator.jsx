@@ -1448,9 +1448,9 @@ export default function InvoiceCreator() {
           />
         </Sidebar>
         
-        <div className={`flex-1 transition-all duration-300 ${isSidebarCollapsed ? 'ml-16' : ''}`}>
+        <div className={`flex-1 transition-all duration-300`}>
           <div className="flex h-full">
-            <div className={`flex-1 p-6 overflow-y-auto transition-all duration-300 ${isRightSidebarCollapsed ? 'mr-10' : 'mr-40'}`}>
+            <div className={`flex-1 p-6 overflow-y-auto transition-all duration-300}`}>
               {error ? (
                 <div className="text-center">
                   <div className="text-red-600 text-xl mb-4">
