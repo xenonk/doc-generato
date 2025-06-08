@@ -5,9 +5,69 @@ import {
   ChevronDown, ChevronRight, ChevronLeft
 } from 'lucide-react';
 
+interface User {
+  id: number;
+  name: string;
+  avatar?: string;
+}
+
+interface Version {
+  id: number;
+  name: string;
+  created_at: string;
+  user: User;
+}
+
+interface Workspace {
+  id: number;
+  name: string;
+  documents: number;
+}
+
+interface VersionHistoryItemProps {
+  version: Version;
+  isCurrent: boolean;
+  onClick: () => void;
+  isCollapsed: boolean;
+}
+
+interface VersionHistoryProps {
+  versions: Version[];
+  currentVersion?: Version;
+  onVersionSelect: (version: Version) => void;
+  isCollapsed: boolean;
+}
+
+interface DocumentWorkspaceProps {
+  selectedWorkspaces: Workspace[];
+  onWorkspaceChange: (workspaces: Workspace[]) => void;
+  isCollapsed: boolean;
+  documentType: string;
+}
+
+interface ChangesModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  changes: string[];
+}
+
+interface DocumentSidebarContentProps {
+  documentType?: string;
+  versions?: Version[];
+  currentVersion?: Version;
+  onVersionSelect: (version: Version) => void;
+  hasUnsavedChanges: boolean;
+  isCollapsed: boolean;
+  onSave: (type: 'draft' | 'final') => Promise<void>;
+  lastSavedState?: any;
+  document?: any;
+  onCollaborationClick?: () => void;
+}
+
 // Helper function to compare objects and get changes
-const getChanges = (oldObj, newObj, prefix = '') => {
-  const changes = [];
+const getChanges = (oldObj: any, newObj: any, prefix = ''): string[] => {
+  const changes: string[] = [];
   
   for (const key in newObj) {
     if (typeof newObj[key] === 'object' && newObj[key] !== null && !Array.isArray(newObj[key])) {
@@ -22,7 +82,7 @@ const getChanges = (oldObj, newObj, prefix = '') => {
 };
 
 // Helper function to format date and time
-const formatDateTime = (dateString) => {
+const formatDateTime = (dateString: string): string => {
   const date = new Date(dateString);
   const hours = date.getHours().toString().padStart(2, '0');
   const minutes = date.getMinutes().toString().padStart(2, '0');
@@ -33,8 +93,8 @@ const formatDateTime = (dateString) => {
 };
 
 // Version History Item Component
-const VersionHistoryItem = ({ version, isCurrent, onClick, isCollapsed }) => {
-  const getStatusColor = (isCurrent) => isCurrent ? 'bg-green-500' : 'bg-gray-300';
+const VersionHistoryItem: React.FC<VersionHistoryItemProps> = ({ version, isCurrent, onClick, isCollapsed }) => {
+  const getStatusColor = (isCurrent: boolean): string => isCurrent ? 'bg-green-500' : 'bg-gray-300';
   
   return (
     <button
@@ -68,13 +128,13 @@ const VersionHistoryItem = ({ version, isCurrent, onClick, isCollapsed }) => {
 };
 
 // Version History Component
-const VersionHistory = ({ versions, currentVersion, onVersionSelect, isCollapsed }) => {
+const VersionHistory: React.FC<VersionHistoryProps> = ({ versions, currentVersion, onVersionSelect, isCollapsed }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -143,13 +203,13 @@ const VersionHistory = ({ versions, currentVersion, onVersionSelect, isCollapsed
 };
 
 // Document Workspace Component
-const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange, isCollapsed, documentType }) => {
+const DocumentWorkspace: React.FC<DocumentWorkspaceProps> = ({ selectedWorkspaces, onWorkspaceChange, isCollapsed, documentType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Mock workspaces data - in real app this would come from an API
-  const allWorkspaces = [
+  const allWorkspaces: Workspace[] = [
     { id: 1, name: `Current ${documentType}`, documents: 1 },
     { id: 2, name: `Q1 2024 ${documentType}s`, documents: 5 },
     { id: 3, name: 'Client Templates', documents: 3 },
@@ -166,7 +226,7 @@ const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange, isCollapsed,
     workspace.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleWorkspaceToggle = (workspace) => {
+  const handleWorkspaceToggle = (workspace: Workspace) => {
     const isSelected = selectedWorkspaces.some(w => w.id === workspace.id);
     if (isSelected) {
       onWorkspaceChange(selectedWorkspaces.filter(w => w.id !== workspace.id));
@@ -175,13 +235,13 @@ const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange, isCollapsed,
     }
   };
 
-  const handleRemoveWorkspace = (workspaceId) => {
+  const handleRemoveWorkspace = (workspaceId: number) => {
     onWorkspaceChange(selectedWorkspaces.filter(w => w.id !== workspaceId));
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -343,7 +403,7 @@ const DocumentWorkspace = ({ selectedWorkspaces, onWorkspaceChange, isCollapsed,
 };
 
 // Changes Modal Component
-const ChangesModal = ({ isOpen, onClose, onSave, changes }) => {
+const ChangesModal: React.FC<ChangesModalProps> = ({ isOpen, onClose, onSave, changes }) => {
   if (!isOpen) return null;
 
   return (
@@ -385,7 +445,7 @@ const ChangesModal = ({ isOpen, onClose, onSave, changes }) => {
 };
 
 // Main DocumentSidebarContent Component
-const DocumentSidebarContent = ({ 
+const DocumentSidebarContent: React.FC<DocumentSidebarContentProps> = ({ 
   documentType = 'Document',
   versions = [], 
   currentVersion,
@@ -397,13 +457,13 @@ const DocumentSidebarContent = ({
   document,
   onCollaborationClick
 }) => {
-  const [selectedWorkspaces, setSelectedWorkspaces] = useState([
+  const [selectedWorkspaces, setSelectedWorkspaces] = useState<Workspace[]>([
     { id: 1, name: `Current ${documentType}`, documents: 1 }
   ]);
   const [showChangesModal, setShowChangesModal] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const handleStatusClick = (e) => {
+  const handleStatusClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (hasUnsavedChanges) {
@@ -472,7 +532,7 @@ const DocumentSidebarContent = ({
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
-                handleStatusClick(e);
+                handleStatusClick(e as unknown as React.MouseEvent);
               }
             }}
             title={hasUnsavedChanges ? "Click to view unsaved changes" : "Click to check status"}
@@ -501,16 +561,14 @@ const DocumentSidebarContent = ({
       </div>
 
       {/* Changes Modal */}
-      {showChangesModal && (
-        <ChangesModal
-          isOpen={showChangesModal}
-          onClose={() => setShowChangesModal(false)}
-          onSave={handleSaveChanges}
-          changes={lastSavedState ? getChanges(lastSavedState, document) : []}
-        />
-      )}
+      <ChangesModal
+        isOpen={showChangesModal}
+        onClose={() => setShowChangesModal(false)}
+        onSave={handleSaveChanges}
+        changes={lastSavedState ? getChanges(lastSavedState, document) : []}
+      />
     </div>
   );
 };
 
-export default DocumentSidebarContent; 
+export default DocumentSidebarContent;

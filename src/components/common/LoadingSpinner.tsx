@@ -1,7 +1,12 @@
 import React from 'react';
 
-const LoadingSpinner = ({ size = 'md', className = '' }) => {
-  const sizeClasses = {
+interface LoadingSpinnerProps {
+  size?: 'sm' | 'md' | 'lg' | 'xl';
+  className?: string;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ size = 'md', className = '' }) => {
+  const sizeClasses: Record<NonNullable<LoadingSpinnerProps['size']>, string> = {
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',

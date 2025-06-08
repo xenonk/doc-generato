@@ -2,7 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 
-const Header = ({ 
+interface HeaderProps {
+  title: string;
+  showSaveButton?: boolean;
+  onSave?: () => void;
+  isSaving?: boolean;
+  showBackButton?: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ 
   title, 
   showSaveButton = false, 
   onSave, 
@@ -28,7 +36,7 @@ const Header = ({
               {title}
             </h1>
           </div>
-          {showSaveButton && (
+          {showSaveButton && onSave && (
             <div className="flex items-center space-x-2">
               <button
                 onClick={onSave}

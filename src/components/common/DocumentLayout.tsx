@@ -3,8 +3,65 @@ import DocumentSidebarContent from './DocumentSidebarContent';
 import DocumentRightSidebar from './DocumentRightSidebar';
 import Sidebar from './Sidebar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { DocumentStatus } from './DocumentRightSidebar';
 
-const DocumentLayout = ({
+interface Document {
+  status: DocumentStatus;
+  [key: string]: any;
+}
+
+interface Version {
+  id: string;
+  [key: string]: any;
+}
+
+interface Workspace {
+  id: string;
+  [key: string]: any;
+}
+
+interface Collaborator {
+  id: string;
+  [key: string]: any;
+}
+
+interface DocumentLayoutProps {
+  title: string;
+  documentType?: string;
+  document?: Document;
+  versions?: Version[];
+  currentVersion?: Version;
+  onVersionSelect?: (version: Version) => void;
+  hasUnsavedChanges?: boolean;
+  onSave?: () => void;
+  isSaving?: boolean;
+  lastSaved?: string;
+  onStatusChange?: (status: string) => void;
+  onCollaborationClick?: () => void;
+  onPreview?: () => void;
+  onExport?: (type: string) => void;
+  children: React.ReactNode;
+  showBackButton?: boolean;
+  onBack?: () => void;
+  additionalHeaderActions?: React.ReactNode;
+  sidebarWidth?: number;
+  rightSidebarWidth?: number;
+  onCollaboration?: () => void;
+  collaborators?: Collaborator[];
+  workspaces?: Workspace[];
+  selectedWorkspace?: Workspace;
+  onWorkspaceSelect?: (workspace: Workspace) => void;
+  onWorkspaceFilter?: (query: string) => void;
+  onUnsavedChangesConfirm?: () => void;
+  onUnsavedChangesCancel?: () => void;
+  leftSidebar?: React.ReactNode;
+  isLeftSidebarCollapsed?: boolean;
+  onLeftSidebarToggle?: () => void;
+  isRightSidebarCollapsed?: boolean;
+  onRightSidebarToggle?: () => void;
+}
+
+const DocumentLayout: React.FC<DocumentLayoutProps> = ({
   title,
   documentType = 'Document',
   document = { status: 'draft' },
@@ -42,8 +99,8 @@ const DocumentLayout = ({
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const [showSaveDropdown, setShowSaveDropdown] = useState(false);
 
-  const handleExport = (type) => {
-    onExport(type);
+  const handleExport = (type: string) => {
+    onExport?.(type);
   };
 
   return (
@@ -82,7 +139,7 @@ const DocumentLayout = ({
             onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
             isCollapsed={isRightSidebarCollapsed}
             onToggle={onRightSidebarToggle}
-            status={document?.status || 'draft'}
+            status={document?.status as DocumentStatus || 'draft'}
             lastSaved={lastSaved}
             documentType={documentType}
           />

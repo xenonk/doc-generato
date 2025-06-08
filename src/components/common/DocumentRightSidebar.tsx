@@ -16,7 +16,34 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 
-const DocumentRightSidebar = ({
+export type DocumentStatus = 'draft' | 'review' | 'approved' | 'rejected' | 'expired';
+type ExportType = 'pdf' | 'docx' | 'json' | 'xlsx' | 'print' | 'share';
+type SaveType = 'final' | 'draft';
+
+interface StatusConfig {
+  [key: string]: {
+    color: string;
+    bgColor: string;
+  };
+}
+
+interface DocumentRightSidebarProps {
+  documentType?: string;
+  onPreview?: () => void;
+  onExport?: (type: ExportType) => void;
+  onSave?: (type: SaveType) => void;
+  isSaving?: boolean;
+  showExportDropdown?: boolean;
+  onExportDropdownToggle?: () => void;
+  showSaveDropdown?: boolean;
+  onSaveDropdownToggle?: () => void;
+  isCollapsed?: boolean;
+  onToggle?: () => void;
+  status?: DocumentStatus;
+  lastSaved?: string;
+}
+
+const DocumentRightSidebar: React.FC<DocumentRightSidebarProps> = ({
   documentType = 'Document',
   onPreview,
   onExport,
@@ -31,14 +58,14 @@ const DocumentRightSidebar = ({
   status = 'draft',
   lastSaved
 }) => {
-  const formatTime = (date) => {
+  const formatTime = (date: Date): string => {
     if (!date) return '';
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${hours}:${minutes}`;
   };
 
-  const statusConfig = {
+  const statusConfig: StatusConfig = {
     draft: { color: 'text-gray-500', bgColor: 'bg-gray-100' },
     review: { color: 'text-yellow-500', bgColor: 'bg-yellow-100' },
     approved: { color: 'text-green-500', bgColor: 'bg-green-100' },
@@ -88,8 +115,8 @@ const DocumentRightSidebar = ({
                     <div className="py-1">
                       <button 
                         onClick={() => {
-                          onExport('pdf');
-                          onExportDropdownToggle();
+                          onExport?.('pdf');
+                          onExportDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -98,8 +125,8 @@ const DocumentRightSidebar = ({
                       </button>
                       <button 
                         onClick={() => {
-                          onExport('docx');
-                          onExportDropdownToggle();
+                          onExport?.('docx');
+                          onExportDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -108,8 +135,8 @@ const DocumentRightSidebar = ({
                       </button>
                       <button 
                         onClick={() => {
-                          onExport('json');
-                          onExportDropdownToggle();
+                          onExport?.('json');
+                          onExportDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -118,8 +145,8 @@ const DocumentRightSidebar = ({
                       </button>
                       <button 
                         onClick={() => {
-                          onExport('xlsx');
-                          onExportDropdownToggle();
+                          onExport?.('xlsx');
+                          onExportDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -128,8 +155,8 @@ const DocumentRightSidebar = ({
                       </button>
                       <button 
                         onClick={() => {
-                          onExport('print');
-                          onExportDropdownToggle();
+                          onExport?.('print');
+                          onExportDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -138,8 +165,8 @@ const DocumentRightSidebar = ({
                       </button>
                       <button 
                         onClick={() => {
-                          onExport('share');
-                          onExportDropdownToggle();
+                          onExport?.('share');
+                          onExportDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -173,8 +200,8 @@ const DocumentRightSidebar = ({
                     <div className="py-1">
                       <button 
                         onClick={() => {
-                          onSave('final');
-                          onSaveDropdownToggle();
+                          onSave?.('final');
+                          onSaveDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
@@ -183,8 +210,8 @@ const DocumentRightSidebar = ({
                       </button>
                       <button 
                         onClick={() => {
-                          onSave('draft');
-                          onSaveDropdownToggle();
+                          onSave?.('draft');
+                          onSaveDropdownToggle?.();
                         }}
                         className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
                       >
