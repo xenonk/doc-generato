@@ -12,22 +12,7 @@ import { getUserProfile } from '../utils/auth';
 import Header from '../components/Header';
 import BaseSidebar from '../components/common/sidebars/BaseSidebar';
 import WarningDialog from '../components/WarningDialog';
-
-// Helper function to compare objects and get changes
-const getChanges = (oldObj, newObj, prefix = '') => {
-  const changes = [];
-  
-  for (const key in newObj) {
-    if (typeof newObj[key] === 'object' && newObj[key] !== null && !Array.isArray(newObj[key])) {
-      changes.push(...getChanges(oldObj[key] || {}, newObj[key], `${prefix}${key}.`));
-    } else if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
-      const fieldName = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-      changes.push(`${prefix}${fieldName} changed from "${oldObj[key] || 'empty'}" to "${newObj[key] || 'empty'}"`);
-    }
-  }
-  
-  return changes;
-};
+import { getChanges } from '../utils/objectUtils';
 
 // Helper function to format date and time
 const formatDateTime = (dateString) => {
