@@ -2,10 +2,48 @@ import React, { useState } from 'react';
 import { 
   FileText, Clock, History, CheckCircle2, AlertCircle, XCircle,
   Save, Send, Download, Printer, Share2, MoreVertical,
-  User, MessageSquare, Tag, Lock, ChevronLeft, ChevronRight
+  User, MessageSquare, Tag, Lock, ChevronLeft, ChevronRight,
+  LucideIcon
 } from 'lucide-react';
 
-const ChangesModal = ({ isOpen, onClose, onSave, changes }) => {
+interface ChangesModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  changes: string[];
+}
+
+interface Version {
+  id: string;
+  version: number;
+  status: 'draft' | 'review' | 'approved' | 'rejected' | 'expired';
+  date: string;
+  author: string;
+  changes: string;
+}
+
+interface Contract {
+  createdBy?: string;
+  lastModified?: string;
+  type?: string;
+  access?: string;
+  assignedTo?: string;
+  commentCount?: number;
+  title?: string;
+}
+
+interface ContractSidebarContentProps {
+  versions?: Version[];
+  currentVersion?: Version;
+  onVersionSelect?: (version: Version) => void;
+  hasUnsavedChanges: boolean;
+  isCollapsed: boolean;
+  onSave: () => void;
+  lastSavedState?: Contract;
+  contract?: Contract;
+}
+
+const ChangesModal: React.FC<ChangesModalProps> = ({ isOpen, onClose, onSave, changes }) => {
   if (!isOpen) return null;
 
   return (
@@ -46,7 +84,7 @@ const ChangesModal = ({ isOpen, onClose, onSave, changes }) => {
   );
 };
 
-const ContractSidebarContent = ({ 
+const ContractSidebarContent: React.FC<ContractSidebarContentProps> = ({ 
   versions = [], 
   currentVersion,
   onVersionSelect,
@@ -70,8 +108,10 @@ const ContractSidebarContent = ({
     setShowChangesModal(false);
   };
 
-  const getChanges = (oldState, newState) => {
-    const changes = [];
+  const getChanges = (oldState: Contract | undefined, newState: Contract | undefined): string[] => {
+    if (!oldState || !newState) return [];
+    
+    const changes: string[] = [];
     // Compare basic information
     if (oldState.title !== newState.title) {
       changes.push(`Title changed from "${oldState.title}" to "${newState.title}"`);
@@ -83,8 +123,8 @@ const ContractSidebarContent = ({
     return changes;
   };
 
-  const VersionHistoryItem = ({ version }) => {
-    const statusIcons = {
+  const VersionHistoryItem: React.FC<{ version: Version }> = ({ version }) => {
+    const statusIcons: Record<Version['status'], { icon: LucideIcon; color: string }> = {
       draft: { icon: FileText, color: 'text-gray-500' },
       review: { icon: Clock, color: 'text-yellow-500' },
       approved: { icon: CheckCircle2, color: 'text-green-500' },
@@ -173,7 +213,7 @@ const ContractSidebarContent = ({
             tabIndex={0}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
-                handleStatusClick(e);
+                handleStatusClick();
               }
             }}
             onMouseEnter={() => setShowTooltip(true)}

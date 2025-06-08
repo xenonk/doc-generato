@@ -2,27 +2,55 @@ import React, { useState } from 'react';
 import { 
   Clock, Star, Users,
   FileText, ChevronDown, ChevronUp,
-  Share2
+  Share2,
+  LucideIcon
 } from 'lucide-react';
 
-const DashboardSidebar = ({ isCollapsed }) => {
-  const [expandedSections, setExpandedSections] = useState({
+interface DashboardSidebarProps {
+  isCollapsed: boolean;
+}
+
+interface SectionHeaderProps {
+  title: string;
+  icon: LucideIcon;
+  section: keyof ExpandedSections;
+  isExpanded: boolean;
+  isCollapsed: boolean;
+  onToggle: () => void;
+}
+
+interface ExpandedSections {
+  quickStats: boolean;
+  recentActivity: boolean;
+  teamActivity: boolean;
+  collections: boolean;
+}
+
+const DashboardSidebar: React.FC<DashboardSidebarProps> = ({ isCollapsed }) => {
+  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
     quickStats: true,
     recentActivity: true,
     teamActivity: true,
     collections: true
   });
 
-  const toggleSection = (section) => {
+  const toggleSection = (section: keyof ExpandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
   };
 
-  const SectionHeader = ({ title, icon: Icon, section }) => (
+  const SectionHeader: React.FC<SectionHeaderProps> = ({ 
+    title, 
+    icon: Icon, 
+    section, 
+    isExpanded, 
+    isCollapsed, 
+    onToggle 
+  }) => (
     <button
-      onClick={() => toggleSection(section)}
+      onClick={onToggle}
       className={`w-full flex items-center justify-between p-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg ${
         isCollapsed ? 'justify-center' : ''
       }`}
@@ -32,14 +60,14 @@ const DashboardSidebar = ({ isCollapsed }) => {
         {!isCollapsed && <span>{title}</span>}
       </div>
       {!isCollapsed && (
-        expandedSections[section] ? 
+        isExpanded ? 
           <ChevronUp className="w-4 h-4" /> : 
           <ChevronDown className="w-4 h-4" />
       )}
     </button>
   );
 
-  const QuickStats = () => (
+  const QuickStats: React.FC = () => (
     <div className="space-y-2 p-2">
       <div className="grid grid-cols-2 gap-2">
         <div className="bg-blue-50 p-2 rounded-lg">
@@ -62,7 +90,7 @@ const DashboardSidebar = ({ isCollapsed }) => {
     </div>
   );
 
-  const RecentActivity = () => (
+  const RecentActivity: React.FC = () => (
     <div className="space-y-2 p-2">
       {[1, 2, 3].map((_, i) => (
         <div key={i} className="flex items-start space-x-2 p-2 hover:bg-gray-50 rounded-lg">
@@ -76,7 +104,7 @@ const DashboardSidebar = ({ isCollapsed }) => {
     </div>
   );
 
-  const TeamActivity = () => (
+  const TeamActivity: React.FC = () => (
     <div className="space-y-2 p-2">
       {[1, 2, 3].map((_, i) => (
         <div key={i} className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg">
@@ -93,7 +121,7 @@ const DashboardSidebar = ({ isCollapsed }) => {
     </div>
   );
 
-  const Collections = () => (
+  const Collections: React.FC = () => (
     <div className="space-y-2 p-2">
       <button className="w-full flex items-center space-x-2 p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-600">
         <Star className="w-4 h-4 text-yellow-500" />
@@ -116,25 +144,53 @@ const DashboardSidebar = ({ isCollapsed }) => {
         <div className="p-4 space-y-4">
           {/* Quick Stats */}
           <div>
-            <SectionHeader title="Quick Stats" icon={Clock} section="quickStats" />
+            <SectionHeader 
+              title="Quick Stats" 
+              icon={Clock} 
+              section="quickStats" 
+              isExpanded={expandedSections.quickStats}
+              isCollapsed={isCollapsed}
+              onToggle={() => toggleSection('quickStats')}
+            />
             {expandedSections.quickStats && !isCollapsed && <QuickStats />}
           </div>
 
           {/* Recent Activity */}
           <div>
-            <SectionHeader title="Recent Activity" icon={FileText} section="recentActivity" />
+            <SectionHeader 
+              title="Recent Activity" 
+              icon={FileText} 
+              section="recentActivity" 
+              isExpanded={expandedSections.recentActivity}
+              isCollapsed={isCollapsed}
+              onToggle={() => toggleSection('recentActivity')}
+            />
             {expandedSections.recentActivity && !isCollapsed && <RecentActivity />}
           </div>
 
           {/* Team Activity */}
           <div>
-            <SectionHeader title="Team Activity" icon={Users} section="teamActivity" />
+            <SectionHeader 
+              title="Team Activity" 
+              icon={Users} 
+              section="teamActivity" 
+              isExpanded={expandedSections.teamActivity}
+              isCollapsed={isCollapsed}
+              onToggle={() => toggleSection('teamActivity')}
+            />
             {expandedSections.teamActivity && !isCollapsed && <TeamActivity />}
           </div>
 
           {/* Collections */}
           <div>
-            <SectionHeader title="Collections" icon={Star} section="collections" />
+            <SectionHeader 
+              title="Collections" 
+              icon={Star} 
+              section="collections" 
+              isExpanded={expandedSections.collections}
+              isCollapsed={isCollapsed}
+              onToggle={() => toggleSection('collections')}
+            />
             {expandedSections.collections && !isCollapsed && <Collections />}
           </div>
         </div>

@@ -1,10 +1,25 @@
 import React from 'react';
 import { X, Bell, CheckCircle, AlertCircle, Info, Clock } from 'lucide-react';
 
-const NotificationDrawer = ({ isOpen, onClose, notifications = [] }) => {
+interface Notification {
+  id: number;
+  type: 'success' | 'warning' | 'info' | 'error';
+  title: string;
+  message: string;
+  timestamp: Date;
+  isRead: boolean;
+}
+
+interface NotificationDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  notifications?: Notification[];
+}
+
+const NotificationDrawer: React.FC<NotificationDrawerProps> = ({ isOpen, onClose, notifications = [] }) => {
   if (!isOpen) return null;
 
-  const getNotificationIcon = (type) => {
+  const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
       case 'success':
         return <CheckCircle className="w-5 h-5 text-green-500" />;
@@ -17,10 +32,10 @@ const NotificationDrawer = ({ isOpen, onClose, notifications = [] }) => {
     }
   };
 
-  const formatTimeAgo = (timestamp) => {
+  const formatTimeAgo = (timestamp: Date) => {
     const now = new Date();
     const date = new Date(timestamp);
-    const diffInSeconds = Math.floor((now - date) / 1000);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     if (diffInSeconds < 60) return 'just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
@@ -29,7 +44,7 @@ const NotificationDrawer = ({ isOpen, onClose, notifications = [] }) => {
   };
 
   // Mock notifications data - in real app this would come from props or API
-  const mockNotifications = [
+  const mockNotifications: Notification[] = [
     {
       id: 1,
       type: 'info',

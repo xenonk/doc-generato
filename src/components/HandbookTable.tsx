@@ -13,7 +13,34 @@ import {
   X
 } from 'lucide-react';
 
-const HandbookTable = ({
+interface Column {
+  key: string;
+  label: string;
+  sortable?: boolean;
+  filterable?: boolean;
+  filterComponent?: React.ReactNode;
+  render?: (value: any, row: any) => React.ReactNode;
+}
+
+interface HandbookTableProps {
+  title: string;
+  columns: Column[];
+  data: any[];
+  onAdd: () => void;
+  onEdit: (row: any) => void;
+  onDelete: (row: any) => void;
+  onSearch?: (query: string) => void;
+  onFilter?: (filters: any) => void;
+  pageSize?: number;
+  totalItems?: number;
+}
+
+interface SortConfig {
+  key: string | null;
+  direction: 'asc' | 'desc';
+}
+
+const HandbookTable: React.FC<HandbookTableProps> = ({
   title,
   columns,
   data,
@@ -26,14 +53,14 @@ const HandbookTable = ({
   totalItems = 0
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRows, setSelectedRows] = useState(new Set());
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
-  const handleSort = (key) => {
+  const handleSort = (key: string) => {
     setSortConfig((current) => ({
       key,
       direction:
@@ -41,13 +68,13 @@ const HandbookTable = ({
     }));
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchQuery(value);
     onSearch?.(value);
   };
 
-  const handleSelectAll = (e) => {
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedRows(new Set(data.map((item) => item.id)));
     } else {
@@ -55,7 +82,7 @@ const HandbookTable = ({
     }
   };
 
-  const handleSelectRow = (id) => {
+  const handleSelectRow = (id: string) => {
     const newSelected = new Set(selectedRows);
     if (newSelected.has(id)) {
       newSelected.delete(id);
@@ -65,7 +92,7 @@ const HandbookTable = ({
     setSelectedRows(newSelected);
   };
 
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
@@ -252,16 +279,18 @@ const HandbookTable = ({
               <span className="font-medium">
                 {Math.min(currentPage * pageSize, totalItems)}
               </span>{' '}
-              of <span className="font-medium">{totalItems}</span> results
+              of{' '}
+              <span className="font-medium">{totalItems}</span> results
             </p>
           </div>
           <div>
-            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
               <button
                 onClick={() => handlePageChange(1)}
                 disabled={currentPage === 1}
                 className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <span className="sr-only">First</span>
                 <ChevronsLeft className="h-5 w-5" />
               </button>
               <button
@@ -269,26 +298,34 @@ const HandbookTable = ({
                 disabled={currentPage === 1}
                 className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <span className="sr-only">Previous</span>
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              {[...Array(totalPages)].map((_, index) => (
-                <button
-                  key={index + 1}
-                  onClick={() => handlePageChange(index + 1)}
-                  className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                    currentPage === index + 1
-                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => {
+                  const start = Math.max(1, currentPage - 2);
+                  const end = Math.min(totalPages, currentPage + 2);
+                  return page >= start && page <= end;
+                })
+                .map(page => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                      currentPage === page
+                        ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                        : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="relative inline-flex items-center px-2 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <span className="sr-only">Next</span>
                 <ChevronRight className="h-5 w-5" />
               </button>
               <button
@@ -296,6 +333,7 @@ const HandbookTable = ({
                 disabled={currentPage === totalPages}
                 className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                <span className="sr-only">Last</span>
                 <ChevronsRight className="h-5 w-5" />
               </button>
             </nav>

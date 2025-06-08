@@ -1,7 +1,14 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Sidebar = ({ 
+interface SidebarProps {
+  isCollapsed: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+  className?: string;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ 
   isCollapsed, 
   onToggle, 
   children,

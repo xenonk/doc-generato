@@ -8,24 +8,34 @@ const SUPPORTED_FORMATS = {
   'application/pdf': '.pdf',
   'text/plain': '.txt',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx'
-};
+} as const;
 
-const DocumentBlueprintUpload = ({ 
+type SupportedFormat = keyof typeof SUPPORTED_FORMATS;
+type DocumentType = 'invoice' | 'contract' | string;
+
+interface DocumentBlueprintUploadProps {
+  onUpload: (file: File) => void;
+  documentType: DocumentType;
+  maxSize?: number;
+  className?: string;
+}
+
+const DocumentBlueprintUpload: React.FC<DocumentBlueprintUploadProps> = ({ 
   onUpload, 
   documentType, 
   maxSize = 10 * 1024 * 1024, // 10MB
   className = ''
 }) => {
   const [isValidating, setIsValidating] = useState(false);
-  const [validationError, setValidationError] = useState(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
-  const validateDocument = async (file) => {
+  const validateDocument = async (file: File): Promise<boolean> => {
     setIsValidating(true);
     setValidationError(null);
 
     try {
       // Basic format validation
-      if (!SUPPORTED_FORMATS[file.type]) {
+      if (!SUPPORTED_FORMATS[file.type as SupportedFormat]) {
         throw new Error(`Unsupported file format. Please upload a ${Object.values(SUPPORTED_FORMATS).join(', ')} file.`);
       }
 
@@ -40,14 +50,14 @@ const DocumentBlueprintUpload = ({
 
       return true;
     } catch (error) {
-      setValidationError(error.message);
+      setValidationError(error instanceof Error ? error.message : 'An error occurred during validation');
       return false;
     } finally {
       setIsValidating(false);
     }
   };
 
-  const onDrop = useCallback(async (acceptedFiles) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
     const file = acceptedFiles[0];
@@ -63,13 +73,16 @@ const DocumentBlueprintUpload = ({
       onUpload(file);
       toast.success('Document blueprint uploaded successfully');
     } else {
-      toast.error(validationError);
+      toast.error(validationError || 'Validation failed');
     }
-  }, [onUpload, maxSize, documentType]);
+  }, [onUpload, maxSize, documentType, validationError]);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     onDrop,
-    accept: SUPPORTED_FORMATS,
+    accept: Object.keys(SUPPORTED_FORMATS).reduce((acc, key) => ({
+      ...acc,
+      [key]: []
+    }), {}),
     maxSize,
     multiple: false
   });
@@ -127,12 +140,12 @@ const DocumentBlueprintUpload = ({
 
 // Placeholder function for document type validation
 // This would be replaced with actual validation logic
-const validateDocumentType = async (file, documentType) => {
+const validateDocumentType = async (file: File, documentType: DocumentType): Promise<boolean> => {
   // Simulate API call
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   // For now, just check file extension
-  const extension = file.name.split('.').pop().toLowerCase();
+  const extension = file.name.split('.').pop()?.toLowerCase();
   
   switch (documentType) {
     case 'invoice':

@@ -1,7 +1,17 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
-const WarningDialog = ({ 
+interface WarningDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  onSaveAndGo?: () => void;
+  changes?: string[];
+  title?: string;
+  message?: string;
+}
+
+const WarningDialog: React.FC<WarningDialogProps> = ({ 
   isOpen, 
   onClose, 
   onConfirm, 

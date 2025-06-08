@@ -3,16 +3,83 @@ import {
   ChevronLeft, ChevronRight, FileText, Clock, 
   History, CheckCircle2, AlertCircle, XCircle,
   Save, Send, Download, Printer, Share2, MoreVertical,
-  User, MessageSquare, Tag, Lock
+  User, MessageSquare, Tag, Lock,
+  LucideIcon
 } from 'lucide-react';
 
-const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, onAction }) => {
+interface Version {
+  id: number;
+  version: string;
+  date: string;
+  author: string;
+  changes: string;
+  status: 'draft' | 'review' | 'approved' | 'rejected' | 'expired';
+}
+
+interface StatusOption {
+  id: 'draft' | 'review' | 'approved' | 'rejected' | 'expired';
+  label: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+interface ActionOption {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  onClick: () => void;
+}
+
+interface ContractData {
+  createdBy?: string;
+  lastModified?: string;
+  type?: string;
+  access?: string;
+  assignedTo?: string;
+  commentCount?: number;
+  status?: string;
+}
+
+interface ContractSidebarProps {
+  isCollapsed: boolean;
+  onToggle: () => void;
+  contractData?: ContractData;
+  onStatusChange: (status: string) => void;
+  onAction: (action: string) => void;
+}
+
+interface TabButtonProps {
+  id: string;
+  icon: LucideIcon;
+  label: string;
+  count?: number;
+}
+
+interface VersionHistoryItemProps {
+  version: Version;
+}
+
+interface StatusOptionProps {
+  status: StatusOption;
+}
+
+interface ActionButtonProps {
+  action: ActionOption;
+}
+
+const ContractSidebar: React.FC<ContractSidebarProps> = ({ 
+  isCollapsed, 
+  onToggle, 
+  contractData, 
+  onStatusChange, 
+  onAction 
+}) => {
   const [activeTab, setActiveTab] = useState('workspace');
   const [isVersionHistoryOpen, setIsVersionHistoryOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
 
   // Mock version history data
-  const versionHistory = [
+  const versionHistory: Version[] = [
     {
       id: 1,
       version: '1.0',
@@ -40,7 +107,7 @@ const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, 
   ];
 
   // Mock status options
-  const statusOptions = [
+  const statusOptions: StatusOption[] = [
     { id: 'draft', label: 'Draft', icon: FileText, color: 'text-gray-500' },
     { id: 'review', label: 'In Review', icon: Clock, color: 'text-yellow-500' },
     { id: 'approved', label: 'Approved', icon: CheckCircle2, color: 'text-green-500' },
@@ -49,7 +116,7 @@ const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, 
   ];
 
   // Mock action options
-  const actionOptions = [
+  const actionOptions: ActionOption[] = [
     { id: 'save', label: 'Save Draft', icon: Save, onClick: () => onAction('save') },
     { id: 'submit', label: 'Submit for Review', icon: Send, onClick: () => onAction('submit') },
     { id: 'download', label: 'Download PDF', icon: Download, onClick: () => onAction('download') },
@@ -57,7 +124,7 @@ const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, 
     { id: 'share', label: 'Share', icon: Share2, onClick: () => onAction('share') }
   ];
 
-  const TabButton = ({ id, icon: Icon, label, count }) => (
+  const TabButton: React.FC<TabButtonProps> = ({ id, icon: Icon, label, count }) => (
     <button
       onClick={() => setActiveTab(id)}
       className={`w-full flex items-center space-x-2 p-2 rounded-lg ${
@@ -80,7 +147,7 @@ const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, 
     </button>
   );
 
-  const VersionHistoryItem = ({ version }) => {
+  const VersionHistoryItem: React.FC<VersionHistoryItemProps> = ({ version }) => {
     const StatusIcon = statusOptions.find(s => s.id === version.status)?.icon || FileText;
     const statusColor = statusOptions.find(s => s.id === version.status)?.color || 'text-gray-500';
 
@@ -97,7 +164,7 @@ const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, 
     );
   };
 
-  const StatusOption = ({ status }) => {
+  const StatusOption: React.FC<StatusOptionProps> = ({ status }) => {
     const Icon = status.icon;
     return (
       <button
@@ -115,7 +182,7 @@ const ContractSidebar = ({ isCollapsed, onToggle, contractData, onStatusChange, 
     );
   };
 
-  const ActionButton = ({ action }) => {
+  const ActionButton: React.FC<ActionButtonProps> = ({ action }) => {
     const Icon = action.icon;
     return (
       <button

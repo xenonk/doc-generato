@@ -4,20 +4,44 @@ import {
   Search, Bell, User, Settings, Moon, LogOut, 
   ChevronDown, FileText, FolderOpen, Layers, 
   FileType, BarChart2, BookOpen, Building2,
-  ScrollText, Package, Coins, Globe
+  ScrollText, Package, Coins, Globe,
+  LucideIcon, Users
 } from 'lucide-react';
 import { getUserProfile } from '../utils/auth';
 import NotificationDrawer from './NotificationDrawer';
 
-const Header = () => {
+interface Notification {
+  id: number;
+  type: 'success' | 'warning' | 'info' | 'error';
+  title: string;
+  message: string;
+  timestamp: Date;
+  isRead: boolean;
+}
+
+interface NavItem {
+  path: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  avatar: string | null;
+}
+
+const Header: React.FC = () => {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showHandbooksDropdown, setShowHandbooksDropdown] = useState(false);
-  const [isNotificationDrawerOpen, setIsNotificationDrawerOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const location = useLocation();
-  const user = getUserProfile();
+  const user: UserProfile = getUserProfile() as UserProfile;
 
   // Mock notifications data - in real app this would come from an API
-  const [notifications] = useState([
+  const notifications: Notification[] = [
     {
       id: 1,
       type: 'info',
@@ -50,11 +74,11 @@ const Header = () => {
       timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
       isRead: true
     }
-  ]);
+  ];
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
-  const handbookItems = [
+  const handbookItems: NavItem[] = [
     { path: '/handbooks/companies', label: 'Companies', icon: Building2 },
     { path: '/handbooks/contracts', label: 'Contracts', icon: ScrollText },
     { path: '/handbooks/incoterms', label: 'Incoterms', icon: Globe },
@@ -62,7 +86,7 @@ const Header = () => {
     { path: '/handbooks/currencies', label: 'Currencies', icon: Coins }
   ];
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { path: '/dashboard', label: 'Dashboard', icon: FileText },
     { path: '/documents', label: 'My Documents', icon: FolderOpen },
     { path: '/document-sets', label: 'Document Sets', icon: Layers },
@@ -175,7 +199,7 @@ const Header = () => {
           <div className="flex items-center space-x-4">
             {/* Notifications */}
             <button 
-              onClick={() => setIsNotificationDrawerOpen(true)}
+              onClick={() => setShowNotifications(true)}
               className="relative p-1 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100"
             >
               <Bell className="w-4 h-4" />
@@ -230,8 +254,8 @@ const Header = () => {
 
       {/* Notification Drawer */}
       <NotificationDrawer
-        isOpen={isNotificationDrawerOpen}
-        onClose={() => setIsNotificationDrawerOpen(false)}
+        isOpen={showNotifications}
+        onClose={() => setShowNotifications(false)}
         notifications={notifications}
       />
     </>

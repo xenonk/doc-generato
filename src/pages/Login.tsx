@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { login } from '../utils/auth';
 import { toast } from 'react-hot-toast';
 
-export default function Login() {
+const Login: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,4 +35,6 @@ export default function Login() {
       </div>
     </div>
   );
-} 
+};
+
+export default Login; 
