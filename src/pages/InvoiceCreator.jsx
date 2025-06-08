@@ -4,7 +4,7 @@ import { useQuery, useMutation } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { 
   ChevronDown, Upload, Plus, Trash2, FileText, 
-  Download, FileJson, FileSpreadsheet, Settings, Moon, LogOut, User, Building2, Mail 
+  Download, FileJson, FileSpreadsheet, Settings, Moon, LogOut, User, Building2, Mail, History
 } from 'lucide-react';
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
@@ -48,6 +48,30 @@ const InvoiceSidebarContent = ({ onSaveAsDraft }) => {
             <Plus className="w-4 h-4 inline mr-2" />
             Add to Workspace
           </button>
+        </div>
+      </div>
+
+      {/* Version History */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-900">Version History</h3>
+          <History className="w-4 h-4 text-gray-400" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div>
+              <p className="text-sm font-medium text-gray-900">Current Version</p>
+              <p className="text-xs text-gray-500">2 minutes ago</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+            <div>
+              <p className="text-sm text-gray-600">Auto-save</p>
+              <p className="text-xs text-gray-500">15 minutes ago</p>
+            </div>
+          </div>
         </div>
       </div>
 
