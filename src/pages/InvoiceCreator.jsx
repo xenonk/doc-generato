@@ -4,88 +4,11 @@ import { useQuery, useMutation } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { 
   ChevronDown, Upload, Plus, Trash2, FileText, 
-  Settings, Moon, LogOut, User, Building2, Mail 
+  Download, FileJson, FileSpreadsheet, Settings, Moon, LogOut, User, Building2, Mail 
 } from 'lucide-react';
 import { documentService } from '../services/documentService';
 import { getUserProfile } from '../utils/auth';
-
-// Header Component
-const Header = ({ onSave, isSaving }) => {
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [showGenerateDropdown, setShowGenerateDropdown] = useState(false);
-  const user = getUserProfile();
-
-  return (
-    <div className="bg-white border-b border-gray-200">
-      <div className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center space-x-8">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-              <FileText className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-semibold text-gray-900">Invoice Creator</span>
-          </div>
-          <nav className="flex space-x-6">
-            <a href="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</a>
-            <a href="/invoice/create" className="text-blue-600 font-medium">Create Invoice</a>
-            <a href="/templates" className="text-gray-600 hover:text-gray-900">Templates</a>
-          </nav>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <button
-              onClick={() => setShowGenerateDropdown(!showGenerateDropdown)}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700"
-            >
-              <span>Generate PDF</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {showGenerateDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <div className="py-1">
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50">Generate PDF</button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50">Generate DOCX</button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50">Export JSON</button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50">Export XLSX</button>
-                </div>
-              </div>
-            )}
-          </div>
-          
-          <div className="relative">
-            <button
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900"
-            >
-              <User className="w-5 h-5" />
-              <span>{user.name}</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            {showProfileDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
-                <div className="py-1">
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                    <Settings className="w-4 h-4" />
-                    <span>Settings</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
-                    <Moon className="w-4 h-4" />
-                    <span>Dark Mode</span>
-                  </button>
-                  <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-red-600">
-                    <LogOut className="w-4 h-4" />
-                    <span>Log Out</span>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import Header from '../components/Header';
 
 // Sidebar Component
 const Sidebar = ({ onSaveAsDraft }) => {
@@ -154,6 +77,7 @@ const InvoiceForm = ({
   isSaving
 }) => {
   const [selectedContract, setSelectedContract] = useState('');
+  const [showGenerateDropdown, setShowGenerateDropdown] = useState(false);
 
   const handleContractSelect = (contractId) => {
     setSelectedContract(contractId);
@@ -162,170 +86,217 @@ const InvoiceForm = ({
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Invoice Header */}
+      {/* Invoice Header Block */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">INVOICE</h1>
             <p className="text-gray-600">Professional Invoice Document</p>
           </div>
-          <div className="text-right">
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Invoice Number</label>
-              <input
-                type="text"
-                value={invoice.number}
-                onChange={(e) => onFieldChange('number', e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-right font-medium"
-              />
+          <div className="flex items-center space-x-3">
+            <button
+              className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
+            >
+              Preview
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowGenerateDropdown(!showGenerateDropdown)}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-700"
+              >
+                <Download className="w-4 h-4" />
+                <span>Export</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              {showGenerateDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="py-1">
+                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Generate PDF</span>
+                    </button>
+                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                      <FileText className="w-4 h-4" />
+                      <span>Generate DOCX</span>
+                    </button>
+                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                      <FileJson className="w-4 h-4" />
+                      <span>Export JSON</span>
+                    </button>
+                    <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2">
+                      <FileSpreadsheet className="w-4 h-4" />
+                      <span>Export XLSX</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <button
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              disabled={isSaving}
+            >
+              {isSaving ? 'Saving...' : 'Save'}
+            </button>
+          </div>
+        </div>
+
+        {/* Invoice Number and Date */}
+        <div className="grid grid-cols-2 gap-8 mt-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Invoice Number</label>
+            <input
+              type="text"
+              value={invoice.number}
+              onChange={(e) => onFieldChange('number', e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 font-medium"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+            <input
+              type="date"
+              value={invoice.date}
+              onChange={(e) => onFieldChange('date', e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Contract Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Contract</label>
+        <div className="relative">
+          <select
+            value={selectedContract}
+            onChange={(e) => handleContractSelect(e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 appearance-none bg-white"
+          >
+            <option value="">Select Contract</option>
+            {contracts.map(contract => (
+              <option key={contract.id} value={contract.id}>
+                {contract.name}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
+        </div>
+      </div>
+
+      {/* From/To Section */}
+      <div className="grid grid-cols-2 gap-8 mb-6">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">From (Seller)</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+              <select
+                value={invoice.seller?.company || ''}
+                onChange={(e) => onCompanyChange('seller', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="">Select Company</option>
+                {companies.map(company => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-              <input
-                type="date"
-                value={invoice.date}
-                onChange={(e) => onFieldChange('date', e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2"
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea
+                value={invoice.seller?.address || ''}
+                onChange={(e) => onFieldChange('seller.address', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
               />
             </div>
-          </div>
-        </div>
-
-        {/* Contract Selection */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Contract</label>
-          <div className="relative">
-            <select
-              value={selectedContract}
-              onChange={(e) => handleContractSelect(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 appearance-none bg-white"
-            >
-              <option value="">Select Contract</option>
-              {contracts.map(contract => (
-                <option key={contract.id} value={contract.id}>
-                  {contract.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-3 h-4 w-4 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* From/To Section */}
-        <div className="grid grid-cols-2 gap-8 mb-6">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">From (Seller)</h3>
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                <select
-                  value={invoice.seller?.company || ''}
-                  onChange={(e) => onCompanyChange('seller', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Director</label>
+                <input
+                  type="text"
+                  value={invoice.seller?.director || ''}
+                  onChange={(e) => onFieldChange('seller.director', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                >
-                  <option value="">Select Company</option>
-                  {companies.map(company => (
-                    <option key={company.id} value={company.id}>
-                      {company.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <textarea
-                  value={invoice.seller?.address || ''}
-                  onChange={(e) => onFieldChange('seller.address', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Director</label>
-                  <input
-                    type="text"
-                    value={invoice.seller?.director || ''}
-                    onChange={(e) => onFieldChange('seller.director', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={invoice.seller?.email || ''}
-                    onChange={(e) => onFieldChange('seller.email', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">To (Buyer)</h3>
-            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
-                <select
-                  value={invoice.buyer?.company || ''}
-                  onChange={(e) => onCompanyChange('buyer', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={invoice.seller?.email || ''}
+                  onChange={(e) => onFieldChange('seller.email', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                >
-                  <option value="">Select Company</option>
-                  {companies.map(company => (
-                    <option key={company.id} value={company.id}>
-                      {company.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                <textarea
-                  value={invoice.buyer?.address || ''}
-                  onChange={(e) => onFieldChange('buyer.address', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
                 />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
-                  <input
-                    type="text"
-                    value={invoice.buyer?.contactPerson || ''}
-                    onChange={(e) => onFieldChange('buyer.contactPerson', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={invoice.buyer?.email || ''}
-                    onChange={(e) => onFieldChange('buyer.email', e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bank Details */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bank Details</label>
-          <select
-            value={invoice.bankDetails || ''}
-            onChange={(e) => onFieldChange('bankDetails', e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          >
-            <option value="">Select Bank Account</option>
-            <option value="Chase Bank - Account: ****1234">Chase Bank - Account: ****1234</option>
-            <option value="Bank of America - Account: ****5678">Bank of America - Account: ****5678</option>
-            <option value="Wells Fargo - Account: ****9012">Wells Fargo - Account: ****9012</option>
-          </select>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">To (Buyer)</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company</label>
+              <select
+                value={invoice.buyer?.company || ''}
+                onChange={(e) => onCompanyChange('buyer', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="">Select Company</option>
+                {companies.map(company => (
+                  <option key={company.id} value={company.id}>
+                    {company.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              <textarea
+                value={invoice.buyer?.address || ''}
+                onChange={(e) => onFieldChange('buyer.address', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                <input
+                  type="text"
+                  value={invoice.buyer?.contactPerson || ''}
+                  onChange={(e) => onFieldChange('buyer.contactPerson', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={invoice.buyer?.email || ''}
+                  onChange={(e) => onFieldChange('buyer.email', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      {/* Bank Details */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Bank Details</label>
+        <select
+          value={invoice.bankDetails || ''}
+          onChange={(e) => onFieldChange('bankDetails', e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2"
+        >
+          <option value="">Select Bank Account</option>
+          <option value="Chase Bank - Account: ****1234">Chase Bank - Account: ****1234</option>
+          <option value="Bank of America - Account: ****5678">Bank of America - Account: ****5678</option>
+          <option value="Wells Fargo - Account: ****9012">Wells Fargo - Account: ****9012</option>
+        </select>
       </div>
 
       {/* Invoice Items */}
@@ -671,7 +642,7 @@ export default function InvoiceCreator() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onSave={handleSave} isSaving={isCreating || isUpdating} />
+      <Header />
       
       <div className="flex">
         <Sidebar onSaveAsDraft={handleSaveAsDraft} />
