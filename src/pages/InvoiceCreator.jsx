@@ -8,15 +8,10 @@ import {
   Search, X, CheckCircle2, AlertCircle, Save, XCircle, ChevronRight, ChevronLeft
 } from 'lucide-react';
 import { documentService } from '../services/documentService';
-import { getUserProfile } from '../utils/auth';
 import Header from '../components/Header';
 import BaseSidebar from '../components/common/sidebars/BaseSidebar';
 import WarningDialog from '../components/WarningDialog';
 import { getChanges } from '../utils/objectUtils';
-import VersionHistory from '../components/common/VersionHistory/VersionHistory';
-import VersionHistoryItem from '../components/common/VersionHistory/VersionHistoryItem';
-import DocumentWorkspace from '../components/common/workspaces/DocumentWorkspace';
-import ChangesModal from '../components/common/modals/ChangesModal';
 import DocumentLeftSidebar from '../components/common/sidebars/DocumentLeftSidebar';
 
 // Right Sidebar Action Bar Component
