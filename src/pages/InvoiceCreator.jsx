@@ -337,6 +337,9 @@ const InvoiceForm = ({
   );
 };
 
+// Move mock data generation outside component
+const mockVersions = generateDocumentVersions('Invoice', 'INV-2024-001');
+
 const InvoiceCreator = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -393,10 +396,10 @@ const InvoiceCreator = () => {
     }
   );
 
-  // Replace the versions query with mock data temporarily
-  const { data: versions = generateDocumentVersions('Invoice', 'INV-2024-001'), isLoading: isLoadingVersions } = useQuery(
+  // Use mock versions data
+  const { data: versions = mockVersions, isLoading: isLoadingVersions } = useQuery(
     ['versions', id],
-    () => Promise.resolve(generateDocumentVersions('Invoice', 'INV-2024-001')), // Simulate API call
+    () => Promise.resolve(mockVersions), // Simulate API call
     {
       enabled: !!id,
       onError: (error) => {
@@ -405,14 +408,14 @@ const InvoiceCreator = () => {
     }
   );
 
-  // Set initial state from current version when component mounts
+  // Set initial state only once when component mounts
   useEffect(() => {
-    if (versions.length > 0) {
+    if (versions.length > 0 && !lastSavedState) {
       const currentVersion = versions[0]; // First version is always current
       setInvoice(currentVersion.data);
       setLastSavedState(currentVersion.data);
     }
-  }, [versions]);
+  }, [versions, lastSavedState]);
 
   // Track changes
   useEffect(() => {
