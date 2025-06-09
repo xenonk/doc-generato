@@ -22,17 +22,13 @@ const BaseSidebar = ({
   const CollapsedIcon = toggleButtonIcon.collapsed;
 
   return (
-    <div className="relative">
+    <div className="relative h-full">
       <aside 
-        className={`bg-white border-r border-gray-200 min-h-[calc(100vh-50px)] transition-all duration-300 ${
+        className={`bg-white border-r border-gray-200 h-full transition-all duration-300 ${
           isCollapsed ? width.collapsed : width.expanded
         } ${className} ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}
       >
-        <div className="h-full flex flex-col">
-          <div className={`flex-1 ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}>
-            {children}
-          </div>
-        </div>
+        {children}
       </aside>
 
       <button

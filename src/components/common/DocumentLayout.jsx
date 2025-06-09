@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DocumentSidebarContent from './sidebars/DocumentLeftSidebar';
+import DocumentLeftSidebar from './sidebars/DocumentLeftSidebar';
 import DocumentRightSidebar from './sidebars/DocumentRightSidebar';
 import BaseSidebar from './sidebars/BaseSidebar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -49,19 +49,36 @@ const DocumentLayout = ({
   return (
     <div className="flex h-full">
       {/* Left Sidebar */}
-      <div className={`relative ${isLeftSidebarCollapsed ? 'w-16' : 'w-80'} transition-all duration-300 ease-in-out`}>
-        {leftSidebar}
-        <button
-          onClick={onLeftSidebarToggle}
-          className="absolute -right-3 top-4 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:bg-gray-50 z-10"
-        >
-          {isLeftSidebarCollapsed ? (
-            <ChevronRight className="h-4 w-4 text-gray-600" />
-          ) : (
-            <ChevronLeft className="h-4 w-4 text-gray-600" />
-          )}
-        </button>
-      </div>
+      <BaseSidebar
+        isCollapsed={isLeftSidebarCollapsed}
+        onToggle={onLeftSidebarToggle}
+        position="left"
+        width={{
+          expanded: 'w-80',
+          collapsed: 'w-16'
+        }}
+        toggleButtonPosition="top-4"
+        toggleButtonOffset="-right-3"
+        toggleButtonIcon={{
+          expanded: ChevronLeft,
+          collapsed: ChevronRight
+        }}
+      >
+        {leftSidebar || (
+          <DocumentLeftSidebar
+            isCollapsed={isLeftSidebarCollapsed}
+            documentType={documentType}
+            versions={versions}
+            currentVersion={currentVersion}
+            onVersionSelect={onVersionSelect}
+            hasUnsavedChanges={hasUnsavedChanges}
+            onSave={onSave}
+            lastSavedState={lastSaved}
+            document={document}
+            onCollaborationClick={onCollaborationClick}
+          />
+        )}
+      </BaseSidebar>
 
       {/* Main Content Area */}
       <div className="flex-1 flex">
@@ -70,33 +87,21 @@ const DocumentLayout = ({
         </div>
 
         {/* Right Sidebar */}
-        <div className={`relative ${isRightSidebarCollapsed ? 'w-16' : 'w-64'} transition-all duration-300 ease-in-out`}>
-          <DocumentRightSidebar
-            onPreview={onPreview}
-            onExport={handleExport}
-            onSave={onSave}
-            isSaving={isSaving}
-            showExportDropdown={showExportDropdown}
-            onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
-            showSaveDropdown={showSaveDropdown}
-            onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
-            isCollapsed={isRightSidebarCollapsed}
-            onToggle={onRightSidebarToggle}
-            status={document?.status || 'draft'}
-            lastSaved={lastSaved}
-            documentType={documentType}
-          />
-          <button
-            onClick={onRightSidebarToggle}
-            className="absolute -left-3 top-4 bg-white border border-gray-200 rounded-full p-1 shadow-sm hover:bg-gray-50 z-10"
-          >
-            {isRightSidebarCollapsed ? (
-              <ChevronLeft className="h-4 w-4 text-gray-600" />
-            ) : (
-              <ChevronRight className="h-4 w-4 text-gray-600" />
-            )}
-          </button>
-        </div>
+        <DocumentRightSidebar
+          onPreview={onPreview}
+          onExport={handleExport}
+          onSave={onSave}
+          isSaving={isSaving}
+          showExportDropdown={showExportDropdown}
+          onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
+          showSaveDropdown={showSaveDropdown}
+          onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+          isCollapsed={isRightSidebarCollapsed}
+          onToggle={onRightSidebarToggle}
+          status={document?.status || 'draft'}
+          lastSaved={lastSaved}
+          documentType={documentType}
+        />
       </div>
     </div>
   );
