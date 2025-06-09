@@ -138,19 +138,32 @@ const DocumentSidebarContent = ({
   );
 };
 
-const DocumentLeftSidebar = ({ isCollapsed, documentType }) => {
-  const [selectedWorkspaces, setSelectedWorkspaces] = useState([]);
-
+const DocumentLeftSidebar = ({ 
+  isCollapsed, 
+  documentType,
+  versions = [],
+  currentVersion,
+  onVersionSelect,
+  hasUnsavedChanges,
+  onSave,
+  lastSavedState,
+  document,
+  onCollaborationClick
+}) => {
   return (
     <div className={`h-full bg-white border-r border-gray-200 ${isCollapsed ? 'w-12' : 'w-64'} transition-all duration-300`}>
-      <div className="p-4">
-        <DocumentWorkspace
-          selectedWorkspaces={selectedWorkspaces}
-          onWorkspaceChange={setSelectedWorkspaces}
-          isCollapsed={isCollapsed}
-          documentType={documentType}
-        />
-      </div>
+      <DocumentSidebarContent
+        isCollapsed={isCollapsed}
+        documentType={documentType}
+        versions={versions}
+        currentVersion={currentVersion}
+        onVersionSelect={onVersionSelect}
+        hasUnsavedChanges={hasUnsavedChanges}
+        onSave={onSave}
+        lastSavedState={lastSavedState}
+        document={document}
+        onCollaborationClick={onCollaborationClick}
+      />
     </div>
   );
 };
