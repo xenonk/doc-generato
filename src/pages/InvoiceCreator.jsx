@@ -14,6 +14,7 @@ import WarningDialog from '../components/WarningDialog';
 import { getChanges } from '../utils/objectUtils';
 import DocumentLeftSidebar from '../components/common/sidebars/DocumentLeftSidebar';
 import DocumentRightSidebar from '../components/common/sidebars/DocumentRightSidebar';
+import { generateDocumentVersions } from '../mocks/documentVersions';
 
 // Invoice Form Component
 const InvoiceForm = ({ 
@@ -334,147 +335,6 @@ const InvoiceForm = ({
   );
 };
 
-// Mock version history data
-const MOCK_VERSIONS = [
-  {
-    id: 'current',
-    name: 'Current Version',
-    created_at: new Date().toISOString(),
-    user: {
-      id: 1,
-      name: 'John Smith',
-      avatar: null,
-      role: 'Admin'
-    },
-    data: {
-      number: 'INV-2024-001',
-      date: new Date().toISOString().split('T')[0],
-      seller: {
-        company: '',
-        address: '',
-        director: '',
-        email: ''
-      },
-      buyer: {
-        company: '',
-        address: '',
-        contactPerson: '',
-        email: ''
-      },
-      bankDetails: '',
-      items: [],
-      currency: 'USD',
-      subtotal: 0,
-      tax: 0,
-      total: 0
-    }
-  },
-  {
-    id: 'v3',
-    name: 'Auto-save',
-    created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    user: {
-      id: 1,
-      name: 'John Smith',
-      avatar: null,
-      role: 'Admin'
-    },
-    data: {
-      number: 'INV-2024-001',
-      date: new Date().toISOString().split('T')[0],
-      seller: {
-        company: 'TechCorp Solutions Ltd.',
-        address: '123 Business Ave\nSuite 100\nNew York, NY 10001',
-        director: 'John Smith',
-        email: 'john@techcorp.com'
-      },
-      buyer: {
-        company: 'Acme Corporation',
-        address: '456 Corporate Blvd\nFloor 25\nLos Angeles, CA 90210',
-        contactPerson: 'Jane Doe',
-        email: 'jane@acme.com'
-      },
-      bankDetails: 'Chase Bank - Account: ****1234',
-      items: [
-        { id: 1, name: 'Software License', grossWeight: 0.5, netWeight: 0.5, unitPrice: 1200.00, amount: 1, total: 1200.00 },
-        { id: 2, name: 'Consulting Services', grossWeight: 0, netWeight: 0, unitPrice: 150.00, amount: 8, total: 1200.00 }
-      ],
-      currency: 'USD',
-      subtotal: 2400.00,
-      tax: 240.00,
-      total: 2640.00
-    }
-  },
-  {
-    id: 'v2',
-    name: 'Version 2',
-    created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-    user: {
-      id: 2,
-      name: 'Sarah Johnson',
-      avatar: null,
-      role: 'Editor'
-    },
-    data: {
-      number: 'INV-2024-001',
-      date: new Date().toISOString().split('T')[0],
-      seller: {
-        company: 'TechCorp Solutions Ltd.',
-        address: '123 Business Ave\nSuite 100\nNew York, NY 10001',
-        director: 'John Smith',
-        email: 'john@techcorp.com'
-      },
-      buyer: {
-        company: 'Acme Corporation',
-        address: '456 Corporate Blvd\nFloor 25\nLos Angeles, CA 90210',
-        contactPerson: 'Jane Doe',
-        email: 'jane@acme.com'
-      },
-      bankDetails: 'Chase Bank - Account: ****1234',
-      items: [
-        { id: 1, name: 'Software License', grossWeight: 0.5, netWeight: 0.5, unitPrice: 1000.00, amount: 1, total: 1000.00 }
-      ],
-      currency: 'USD',
-      subtotal: 1000.00,
-      tax: 100.00,
-      total: 1100.00
-    }
-  },
-  {
-    id: 'v1',
-    name: 'Initial Version',
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    user: {
-      id: 3,
-      name: 'Michael Brown',
-      avatar: null,
-      role: 'Viewer'
-    },
-    data: {
-      number: 'INV-2024-001',
-      date: new Date().toISOString().split('T')[0],
-      seller: {
-        company: 'TechCorp Solutions Ltd.',
-        address: '123 Business Ave\nSuite 100\nNew York, NY 10001',
-        director: 'John Smith',
-        email: 'john@techcorp.com'
-      },
-      buyer: {
-        company: 'Acme Corporation',
-        address: '456 Corporate Blvd\nFloor 25\nLos Angeles, CA 90210',
-        contactPerson: 'Jane Doe',
-        email: 'jane@acme.com'
-      },
-      bankDetails: '',
-      items: [],
-      currency: 'USD',
-      subtotal: 0,
-      tax: 0,
-      total: 0
-    }
-  }
-];
-
 const InvoiceCreator = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -534,9 +394,9 @@ const InvoiceCreator = () => {
   );
 
   // Replace the versions query with mock data temporarily
-  const { data: versions = MOCK_VERSIONS, isLoading: isLoadingVersions } = useQuery(
+  const { data: versions = generateDocumentVersions('Invoice', 'INV-2024-001'), isLoading: isLoadingVersions } = useQuery(
     ['versions', id],
-    () => Promise.resolve(MOCK_VERSIONS), // Simulate API call
+    () => Promise.resolve(generateDocumentVersions('Invoice', 'INV-2024-001')), // Simulate API call
     {
       enabled: !!id,
       onError: (error) => {
