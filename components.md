@@ -1,3 +1,9 @@
+Definitions:
+1. Page - What user sees on screen: header, sidebars, contents, etc;
+2. Document - The entity responsible for storing, displaying, retrieving, creating, modifying, deleting, and other document operations. A document includes fields (various form elements), a layout for displaying them in the content part of the page, and customizable rules and actions for a specific document type. You can think of documents as a collection of fields that have common methods for processing them. Example of document types: invoice, invoice, commercial offer, request for documents, legal information about the company, export declaration, payment documents, personal account statement and others;
+3. Field - A part of a document, a form element that can be modified or simply displayed for reading. There can be many fields in one document. Fields can be of different types: Input, textarea, select, radio button, etc;
+4. Blueprint - A document template that contains the layout of elements and variables that are populated by the application. The export component, using various libraries, generates a document in the format chosen by the user;
+
 1. Application global components:
 
 1.1. Page structure components:
