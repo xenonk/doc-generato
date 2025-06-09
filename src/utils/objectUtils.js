@@ -5,6 +5,7 @@
  * @param {string} prefix - Optional prefix for nested properties
  * @returns {string[]} Array of change descriptions
  */
+
 export const getChanges = (oldObj, newObj, prefix = '') => {
   const changes = [];
   
