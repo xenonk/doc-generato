@@ -93,7 +93,7 @@ const DocumentRightSidebar = ({
                 )}
               </button>
               {showExportDropdown && (
-                <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-0 mt-2'} w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10`}>
+                <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-0 mt-2'} w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50`}>
                   <div className="py-1">
                     <button 
                       onClick={() => {
@@ -178,7 +178,7 @@ const DocumentRightSidebar = ({
                 )}
               </button>
               {showSaveDropdown && (
-                <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-0 mt-2'} w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10`}>
+                <div className={`absolute ${isCollapsed ? 'left-full ml-2' : 'left-0 mt-2'} w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50`}>
                   <div className="py-1">
                     <button 
                       onClick={() => {

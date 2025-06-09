@@ -26,10 +26,10 @@ const BaseSidebar = ({
       <aside 
         className={`bg-white border-r border-gray-200 min-h-[calc(100vh-50px)] transition-all duration-300 ${
           isCollapsed ? width.collapsed : width.expanded
-        } ${className}`}
+        } ${className} ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}
       >
         <div className="h-full flex flex-col">
-          <div className="flex-1 overflow-y-auto">
+          <div className={`flex-1 ${isCollapsed ? 'overflow-visible' : 'overflow-y-auto'}`}>
             {children}
           </div>
         </div>
