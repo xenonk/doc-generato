@@ -17,6 +17,7 @@ import DocumentRightSidebar from '../components/common/sidebars/DocumentRightSid
 import { generateDocumentVersions } from '../mocks/documentVersions';
 import useVersionHistory from '../hooks/useVersionHistory';
 import VersionWarningDialog from '../components/common/modals/VersionWarningDialog';
+import Page from '../components/common/Page';
 
 // Invoice Form Component
 const InvoiceForm = ({ 
@@ -606,85 +607,83 @@ const InvoiceCreator = () => {
   const isUpdating = updateMutation.isLoading;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <div className="flex h-[calc(100vh-64px)]">
-        <BaseSidebar 
+    <Page
+      leftSidebar={
+        <DocumentLeftSidebar
           isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        >
-          <DocumentLeftSidebar
-            isCollapsed={isSidebarCollapsed}
-            documentType="Invoice"
-            versions={versions}
-            currentVersion={lastSavedState}
-            onVersionSelect={handleVersionSelect}
-            hasUnsavedChanges={hasUnsavedChanges}
-            onSave={handleSave}
-            lastSavedState={lastSavedState}
-            document={invoice}
-            onCollaborationClick={() => {/* Handle collaboration click */}}
-          />
-        </BaseSidebar>
-        
-        <div className={`flex-1 transition-all duration-300`}>
-          <div className="flex h-full">
-            <div className={`flex-1 p-6 overflow-y-auto transition-all duration-300}`}>
-              {error ? (
-                <div className="text-center">
-                  <div className="text-red-600 text-xl mb-4">
-                    Failed to load data
-                  </div>
-                  <p className="text-gray-600 mb-4">{error.message}</p>
-                  <button
-                    onClick={() => navigate('/dashboard')}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  >
-                    Go Back to Dashboard
-                  </button>
-                </div>
-              ) : (
-                <div className="w-full">
-                  <InvoiceForm
-                    invoice={invoice}
-                    companies={companies}
-                    contracts={contracts}
-                    onFieldChange={handleFieldChange}
-                    onContractChange={handleContractChange}
-                    onCompanyChange={handleCompanyChange}
-                    onAddItem={addItem}
-                    onUpdateItem={updateItem}
-                    onRemoveItem={removeItem}
-                    onSave={handleSave}
-                    isSaving={isCreating || isUpdating}
-                  />
-                </div>
-              )}
+          documentType="Invoice"
+          versions={versions}
+          currentVersion={lastSavedState}
+          onVersionSelect={handleVersionSelect}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onSave={handleSave}
+          lastSavedState={lastSavedState}
+          document={invoice}
+          onCollaborationClick={() => {/* Handle collaboration click */}}
+        />
+      }
+      rightSidebar={
+        <DocumentRightSidebar
+          documentType="Invoice"
+          onPreview={() => {/* Handle preview */}}
+          onExport={(type) => {
+            console.log(`Exporting as ${type}`);
+            setShowGenerateDropdown(false);
+          }}
+          onSave={handleSave}
+          isSaving={isCreating || isUpdating}
+          showExportDropdown={showGenerateDropdown}
+          onExportDropdownToggle={() => setShowGenerateDropdown(!showGenerateDropdown)}
+          showSaveDropdown={showSaveDropdown}
+          onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+          isCollapsed={isRightSidebarCollapsed}
+          onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
+          status="draft"
+          lastSaved={lastSaved}
+        />
+      }
+      isLeftSidebarCollapsed={isSidebarCollapsed}
+      isRightSidebarCollapsed={isRightSidebarCollapsed}
+      onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      onRightSidebarToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
+      showBreadcrumbs={true}
+      breadcrumbs={[
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Invoices', href: '/documents/invoices' },
+        { label: isEditing ? `Edit Invoice ${invoice.number}` : 'New Invoice' }
+      ]}
+    >
+      <div className="p-6">
+        {error ? (
+          <div className="text-center">
+            <div className="text-red-600 text-xl mb-4">
+              Failed to load data
             </div>
-
-            {/* Right Sidebar */}
-            <DocumentRightSidebar
-              documentType="Invoice"
-              onPreview={() => {/* Handle preview */}}
-              onExport={(type) => {
-                // Handle different export types
-                console.log(`Exporting as ${type}`);
-                setShowGenerateDropdown(false);
-              }}
+            <p className="text-gray-600 mb-4">{error.message}</p>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Go Back to Dashboard
+            </button>
+          </div>
+        ) : (
+          <div className="w-full">
+            <InvoiceForm
+              invoice={invoice}
+              companies={companies}
+              contracts={contracts}
+              onFieldChange={handleFieldChange}
+              onContractChange={handleContractChange}
+              onCompanyChange={handleCompanyChange}
+              onAddItem={addItem}
+              onUpdateItem={updateItem}
+              onRemoveItem={removeItem}
               onSave={handleSave}
               isSaving={isCreating || isUpdating}
-              showExportDropdown={showGenerateDropdown}
-              onExportDropdownToggle={() => setShowGenerateDropdown(!showGenerateDropdown)}
-              showSaveDropdown={showSaveDropdown}
-              onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
-              isCollapsed={isRightSidebarCollapsed}
-              onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
-              status="draft"
-              lastSaved={lastSaved}
             />
           </div>
-        </div>
+        )}
       </div>
 
       <VersionWarningDialog
@@ -693,7 +692,7 @@ const InvoiceCreator = () => {
         onConfirm={handleWarningDialogConfirm}
         onSaveAndGo={handleWarningDialogSaveAndGo}
       />
-    </div>
+    </Page>
   );
 };
 
