@@ -15,6 +15,8 @@ import { getChanges } from '../utils/objectUtils';
 import DocumentLeftSidebar from '../components/common/sidebars/DocumentLeftSidebar';
 import DocumentRightSidebar from '../components/common/sidebars/DocumentRightSidebar';
 import { generateDocumentVersions } from '../mocks/documentVersions';
+import useVersionHistory from '../hooks/useVersionHistory';
+import VersionWarningDialog from '../components/common/modals/VersionWarningDialog';
 
 // Invoice Form Component
 const InvoiceForm = ({ 
@@ -340,8 +342,6 @@ const InvoiceCreator = () => {
   const navigate = useNavigate();
   const isEditing = !!id;
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState(null);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedState, setLastSavedState] = useState(null);
   const [lastSaved, setLastSaved] = useState(new Date());
@@ -466,41 +466,21 @@ const InvoiceCreator = () => {
     }
   };
 
-  // Handle version selection
-  const handleVersionSelect = (version) => {
-    if (hasUnsavedChanges) {
-      setSelectedVersion(version);
-      setShowWarningDialog(true);
-    } else {
-      restoreVersion(version);
-    }
-  };
-
-  // Restore version
-  const restoreVersion = (version) => {
-    setInvoice(version.data);
-    setLastSavedState(version.data);
-    setHasUnsavedChanges(false);
-    toast.success('Version restored successfully');
-  };
-
-  // Handle warning dialog actions
-  const handleWarningDialogConfirm = () => {
-    restoreVersion(selectedVersion);
-    setShowWarningDialog(false);
-    setSelectedVersion(null);
-  };
-
-  const handleWarningDialogSaveAndGo = async () => {
-    try {
-      await handleSave('final');
-      restoreVersion(selectedVersion);
-      setShowWarningDialog(false);
-      setSelectedVersion(null);
-    } catch (error) {
-      toast.error('Failed to save changes');
-    }
-  };
+  const {
+    selectedVersion: versionToRestore,
+    showWarningDialog: isWarningDialogOpen,
+    handleVersionSelect,
+    handleWarningDialogConfirm,
+    handleWarningDialogSaveAndGo,
+    setShowWarningDialog: setWarningDialogOpen
+  } = useVersionHistory({
+    currentDocument: invoice,
+    onDocumentChange: setInvoice,
+    onSave: handleSave,
+    hasUnsavedChanges,
+    setHasUnsavedChanges,
+    setLastSavedState
+  });
 
   const handleFieldChange = (field, value) => {
     if (field.includes('.')) {
@@ -704,17 +684,11 @@ const InvoiceCreator = () => {
         </div>
       </div>
 
-      <WarningDialog
-        isOpen={showWarningDialog}
-        onClose={() => {
-          setShowWarningDialog(false);
-          setSelectedVersion(null);
-        }}
+      <VersionWarningDialog
+        isOpen={isWarningDialogOpen}
+        onClose={() => setWarningDialogOpen(false)}
         onConfirm={handleWarningDialogConfirm}
         onSaveAndGo={handleWarningDialogSaveAndGo}
-        changes={lastSavedState ? getChanges(lastSavedState, invoice) : []}
-        title="Unsaved Changes"
-        message="You have unsaved changes that will be lost if you restore this version. Would you like to save your changes first?"
       />
     </div>
   );
