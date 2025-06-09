@@ -17,8 +17,7 @@ import { DOCUMENT_TYPES } from '../config/documentTypes';
 import { useQuery } from 'react-query';
 import { documentService } from '../services/documentService';
 import { toast } from 'react-hot-toast';
-import Header from '../components/Header';
-import BaseSidebar from '../components/common/sidebars/BaseSidebar';
+import Page from '../components/common/Page';
 import DashboardSidebar from '../components/DashboardSidebar';
 
 const DocumentTypeCard = ({ doc, onClick }) => {
@@ -166,144 +165,133 @@ export default function Dashboard() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <Page
+      leftSidebar={<DashboardSidebar isCollapsed={isSidebarCollapsed} />}
+      isLeftSidebarCollapsed={isSidebarCollapsed}
+      onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+      showBreadcrumbs={false}
+    >
+      <div className="space-y-8 w-full">
+        {/* Quick Document Creation */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Quick Document Creation</h2>
+            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus className="w-4 h-4" />
+              <span>Custom Template</span>
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Object.values(DOCUMENT_TYPES).map((doc) => (
+              <DocumentTypeCard
+                key={doc.id}
+                doc={doc}
+                onClick={handleDocumentCreate}
+              />
+            ))}
+          </div>
+        </section>
 
-      <div className="flex">
-        <BaseSidebar 
-          isCollapsed={isSidebarCollapsed}
-          onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        >
-          <DashboardSidebar isCollapsed={isSidebarCollapsed} />
-        </BaseSidebar>
-
-        {/* Main Content */}
-        <main className={`flex-1 transition-all duration-300`}>
-          <div className="p-6 h-full">
-            <div className="space-y-8 w-full">
-              {/* Quick Document Creation */}
-              <section>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Quick Document Creation</h2>
-                  <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    <Plus className="w-4 h-4" />
-                    <span>Custom Template</span>
-                  </button>
+        {/* Recent Documents */}
+        <section>
+          <div className="bg-white rounded-lg border border-gray-200 w-full">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Recent Documents</h3>
+                <div className="flex items-center space-x-2">
+                  <Filter className="w-4 h-4 text-gray-400" />
+                  <select className="text-sm border-gray-300 rounded-md">
+                    <option>Sort by: Modified</option>
+                    <option>Sort by: Name</option>
+                    <option>Sort by: Type</option>
+                  </select>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {Object.values(DOCUMENT_TYPES).map((doc) => (
-                    <DocumentTypeCard
-                      key={doc.id}
-                      doc={doc}
-                      onClick={handleDocumentCreate}
-                    />
-                  ))}
-                </div>
-              </section>
-
-              {/* Recent Documents */}
-              <section>
-                <div className="bg-white rounded-lg border border-gray-200 w-full">
-                  <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-semibold text-gray-900">Recent Documents</h3>
-                      <div className="flex items-center space-x-2">
-                        <Filter className="w-4 h-4 text-gray-400" />
-                        <select className="text-sm border-gray-300 rounded-md">
-                          <option>Sort by: Modified</option>
-                          <option>Sort by: Name</option>
-                          <option>Sort by: Type</option>
-                        </select>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {['All', 'My Documents', 'Draft', 'Completed', 'Approval Awaiting'].map((tab) => (
-                        <button
-                          key={tab}
-                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                            selectedTab === tab
-                              ? 'bg-blue-100 text-blue-700'
-                              : 'text-gray-600 hover:text-gray-900'
-                          }`}
-                          onClick={() => setSelectedTab(tab)}
-                        >
-                          {tab}
-                          {tab === 'Approval Awaiting' && (
-                            <span className="ml-1 px-1.5 py-0.5 bg-orange-200 text-orange-800 text-xs rounded-full">
-                              {recentDocuments.filter(doc => doc.status === 'approval_awaiting').length}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="divide-y divide-gray-200">
-                    {isLoadingDocuments ? (
-                      <div className="p-4 text-center text-gray-500">Loading documents...</div>
-                    ) : filteredDocuments.length === 0 ? (
-                      <div className="p-4 text-center text-gray-500">No documents found</div>
-                    ) : (
-                      filteredDocuments.map((doc) => (
-                        <RecentDocumentItem 
-                          key={doc.id} 
-                          doc={doc} 
-                          onClick={handleDocumentClick}
-                        />
-                      ))
+              </div>
+              
+              <div className="flex flex-wrap gap-2 mt-4">
+                {['All', 'My Documents', 'Draft', 'Completed', 'Approval Awaiting'].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      selectedTab === tab
+                        ? 'bg-blue-100 text-blue-700'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    onClick={() => setSelectedTab(tab)}
+                  >
+                    {tab}
+                    {tab === 'Approval Awaiting' && (
+                      <span className="ml-1 px-1.5 py-0.5 bg-orange-200 text-orange-800 text-xs rounded-full">
+                        {recentDocuments.filter(doc => doc.status === 'approval_awaiting').length}
+                      </span>
                     )}
-                  </div>
-                </div>
-              </section>
-
-              {/* Document Analytics */}
-              <section>
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Document Analytics</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {[
-                    {
-                      title: 'Documents Created',
-                      value: '127',
-                      change: '+12%',
-                      changeType: 'positive',
-                      subtitle: 'from last month',
-                      color: 'bg-blue-50 text-blue-600'
-                    },
-                    {
-                      title: 'Templates Used',
-                      value: '43',
-                      change: '+8%',
-                      changeType: 'positive',
-                      subtitle: 'from last month',
-                      color: 'bg-green-50 text-green-600'
-                    },
-                    {
-                      title: 'Time Saved',
-                      value: '24h',
-                      change: '+15%',
-                      changeType: 'positive',
-                      subtitle: 'efficiency',
-                      color: 'bg-purple-50 text-purple-600'
-                    },
-                    {
-                      title: 'Shared Documents',
-                      value: '89',
-                      change: '+5%',
-                      changeType: 'positive',
-                      subtitle: 'from last month',
-                      color: 'bg-orange-50 text-orange-600'
-                    }
-                  ].map((metric, index) => (
-                    <AnalyticsCard key={index} metric={metric} />
-                  ))}
-                </div>
-              </section>
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="divide-y divide-gray-200">
+              {isLoadingDocuments ? (
+                <div className="p-4 text-center text-gray-500">Loading documents...</div>
+              ) : filteredDocuments.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">No documents found</div>
+              ) : (
+                filteredDocuments.map((doc) => (
+                  <RecentDocumentItem 
+                    key={doc.id} 
+                    doc={doc} 
+                    onClick={handleDocumentClick}
+                  />
+                ))
+              )}
             </div>
           </div>
-        </main>
+        </section>
+
+        {/* Document Analytics */}
+        <section>
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">Document Analytics</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: 'Documents Created',
+                value: '127',
+                change: '+12%',
+                changeType: 'positive',
+                subtitle: 'from last month',
+                color: 'bg-blue-50 text-blue-600'
+              },
+              {
+                title: 'Templates Used',
+                value: '43',
+                change: '+8%',
+                changeType: 'positive',
+                subtitle: 'from last month',
+                color: 'bg-green-50 text-green-600'
+              },
+              {
+                title: 'Time Saved',
+                value: '24h',
+                change: '+15%',
+                changeType: 'positive',
+                subtitle: 'efficiency',
+                color: 'bg-purple-50 text-purple-600'
+              },
+              {
+                title: 'Shared Documents',
+                value: '89',
+                change: '+5%',
+                changeType: 'positive',
+                subtitle: 'from last month',
+                color: 'bg-orange-50 text-orange-600'
+              }
+            ].map((metric, index) => (
+              <AnalyticsCard key={index} metric={metric} />
+            ))}
+          </div>
+        </section>
       </div>
-    </div>
+    </Page>
   );
 } 

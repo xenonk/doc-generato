@@ -4,7 +4,6 @@ import {
   FileText, ChevronDown, ChevronUp,
   Share2
 } from 'lucide-react';
-import BaseSidebar from './common/sidebars/BaseSidebar';
 
 const DashboardSidebar = ({ isCollapsed }) => {
   const [expandedSections, setExpandedSections] = useState({
@@ -112,7 +111,7 @@ const DashboardSidebar = ({ isCollapsed }) => {
   );
 
   return (
-    <BaseSidebar isCollapsed={isCollapsed}>
+    <div className="h-full overflow-y-auto">
       <div className="p-4 space-y-4">
         {/* Quick Stats */}
         <div>
@@ -138,7 +137,7 @@ const DashboardSidebar = ({ isCollapsed }) => {
           {expandedSections.collections && !isCollapsed && <Collections />}
         </div>
       </div>
-    </BaseSidebar>
+    </div>
   );
 };
 
