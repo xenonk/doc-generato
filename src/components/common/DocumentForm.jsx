@@ -1,4 +1,7 @@
 import React from 'react';
+import TextField from './fields/TextField';
+import SelectField from './fields/SelectField';
+import TextareaField from './fields/TextareaField';
 
 const DocumentForm = ({
   schema = [],
@@ -19,45 +22,38 @@ const DocumentForm = ({
             {section.fields.map((field) => {
               if (field.type === 'input' || field.type === 'date' || field.type === 'email' || field.type === 'number') {
                 return (
-                  <div key={field.name} className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-                    <input
-                      type={field.type}
-                      value={field.getValue(documentData)}
-                      onChange={e => onFieldChange(field.name, e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                      {...field.inputProps}
-                    />
-                  </div>
+                  <TextField
+                    key={field.name}
+                    label={field.label}
+                    value={field.getValue(documentData)}
+                    onChange={e => onFieldChange(field.name, e.target.value)}
+                    type={field.inputProps?.type || field.type}
+                    name={field.name}
+                    {...field.inputProps}
+                  />
                 );
               }
               if (field.type === 'select') {
                 return (
-                  <div key={field.name} className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-                    <select
-                      value={field.getValue(documentData)}
-                      onChange={e => onFieldChange(field.name, e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="">{field.placeholder || 'Select'}</option>
-                      {field.options && field.options.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  </div>
+                  <SelectField
+                    key={field.name}
+                    label={field.label}
+                    value={field.getValue(documentData)}
+                    onChange={e => onFieldChange(field.name, e.target.value)}
+                    name={field.name}
+                    options={field.options || []}
+                  />
                 );
               }
               if (field.type === 'textarea') {
                 return (
-                  <div key={field.name} className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-                    <textarea
-                      value={field.getValue(documentData)}
-                      onChange={e => onFieldChange(field.name, e.target.value)}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 h-20"
-                    />
-                  </div>
+                  <TextareaField
+                    key={field.name}
+                    label={field.label}
+                    value={field.getValue(documentData)}
+                    onChange={e => onFieldChange(field.name, e.target.value)}
+                    name={field.name}
+                  />
                 );
               }
               if (field.type === 'custom' && field.render) {
