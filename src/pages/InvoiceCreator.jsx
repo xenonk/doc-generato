@@ -620,32 +620,17 @@ const InvoiceCreator = () => {
             lastSavedState={lastSavedState}
             document={invoice}
             onCollaborationClick={() => {/* Handle collaboration click */}}
+            onPreview={() => {/* Handle preview */}}
+            onExport={(type) => {
+              console.log(`Exporting as ${type}`);
+              setShowGenerateDropdown(false);
+            }}
+            isSaving={isCreating || isUpdating}
+            lastSaved={lastSaved}
           />
       }
-      rightSidebar={
-        <DocumentRightSidebar
-          documentType="Invoice"
-          onPreview={() => {/* Handle preview */}}
-          onExport={(type) => {
-            console.log(`Exporting as ${type}`);
-            setShowGenerateDropdown(false);
-          }}
-          onSave={handleSave}
-          isSaving={isCreating || isUpdating}
-          showExportDropdown={showGenerateDropdown}
-          onExportDropdownToggle={() => setShowGenerateDropdown(!showGenerateDropdown)}
-          showSaveDropdown={showSaveDropdown}
-          onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
-          isCollapsed={isRightSidebarCollapsed}
-          onToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
-          status="draft"
-          lastSaved={lastSaved}
-        />
-      }
       isLeftSidebarCollapsed={isSidebarCollapsed}
-      isRightSidebarCollapsed={isRightSidebarCollapsed}
       onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      onRightSidebarToggle={() => setIsRightSidebarCollapsed(!isRightSidebarCollapsed)}
       showBreadcrumbs={true}
       breadcrumbs={[
         { label: 'Dashboard', href: '/dashboard' },

@@ -4,6 +4,7 @@ import DocumentWorkspace from '../workspaces/DocumentWorkspace';
 import VersionHistory from '../VersionHistory/VersionHistory';
 import ChangesModal from '../modals/ChangesModal';
 import { getChanges } from '../../../utils/objectUtils';
+import DocumentActions from './DocumentActions';
 
 const DocumentLeftSidebar = ({ 
   isCollapsed, 
@@ -15,11 +16,17 @@ const DocumentLeftSidebar = ({
   onSave,
   lastSavedState,
   document,
-  onCollaborationClick
+  onCollaborationClick,
+  onPreview,
+  onExport,
+  isSaving,
+  lastSaved
 }) => {
   const [selectedWorkspaces, setSelectedWorkspaces] = useState([]);
   const [showChangesModal, setShowChangesModal] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const [showSaveDropdown, setShowSaveDropdown] = useState(false);
 
   const handleStatusClick = (e) => {
     e.stopPropagation();
@@ -35,8 +42,19 @@ const DocumentLeftSidebar = ({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Main Content Area */}
+      {/* Actions at the top */}
       <div className={`flex-1 ${isCollapsed ? 'px-2' : 'p-6'}`}>
+        <DocumentActions
+          onPreview={onPreview}
+          onExport={onExport}
+          onSave={onSave}
+          isSaving={isSaving}
+          showExportDropdown={showExportDropdown}
+          onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
+          showSaveDropdown={showSaveDropdown}
+          onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+          lastSaved={lastSaved}
+        />
         {/* Import Data */}
         {!isCollapsed && <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>}
         <div className={`border-2 border-dashed border-gray-300 rounded-lg ${isCollapsed ? 'p-2' : 'p-6'} text-center ${isCollapsed ? 'mb-2' : 'mb-6'}`}>
