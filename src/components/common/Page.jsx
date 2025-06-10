@@ -19,7 +19,11 @@ const Page = ({
   
   // Layout props
   fullHeight = true,
-  contentClassName = ''
+  contentClassName = '',
+  
+  // Sidebar toggle props
+  isLeftSidebarCollapsed = false,
+  onLeftSidebarToggle,
 }) => {
   return (
     <div className={`min-h-screen flex flex-col bg-gray-50 ${className}`}>
@@ -29,11 +33,24 @@ const Page = ({
       {/* Main Layout */}
       <div className="flex flex-col md:flex-row flex-1 w-full">
         {/* Left Sidebar */}
-        {leftSidebar && (
-          <aside className="w-full md:w-80 flex-shrink-0 border-r border-gray-200 bg-white">
-            {leftSidebar}
-          </aside>
-        )}
+        <aside
+          className={`w-full flex-shrink-0 border-r border-gray-200 bg-white relative transition-all duration-300
+            ${isLeftSidebarCollapsed ? 'md:w-16' : 'md:w-80'}`}
+        >
+          {/* Sidebar Toggle Button */}
+          <button
+            onClick={onLeftSidebarToggle}
+            className="absolute top-4 right-[-18px] w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm z-10"
+            title={isLeftSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isLeftSidebarCollapsed ? (
+              <ChevronRight className="w-4 h-4" />
+            ) : (
+              <ChevronLeft className="w-4 h-4" />
+            )}
+          </button>
+          {leftSidebar}
+        </aside>
         
         {/* Main Content */}
         <main className="flex-1 min-w-0">
