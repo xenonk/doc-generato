@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Building2, Search, X, ChevronDown
+  Building2, Search, X, ChevronDown, Layers 
 } from 'lucide-react';
 
 const DocumentWorkspace = ({ 
@@ -131,7 +131,10 @@ const DocumentWorkspace = ({
 
   return (
     <div className="mb-6">
-      <h3 className="text-sm font-medium text-gray-900 mb-3">Document Workspace</h3>
+      <div className="flex items-center gap-2 mb-3">
+        <Layers className="w-4 h-4 text-gray-500" />
+        <h3 className="text-sm font-medium text-gray-900">Document Workspace</h3>
+      </div>
       <div className="relative" ref={dropdownRef}>
         <div 
           onClick={() => setIsOpen(!isOpen)}

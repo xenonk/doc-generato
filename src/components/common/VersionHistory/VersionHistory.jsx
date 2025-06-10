@@ -57,9 +57,9 @@ const VersionHistory = ({ versions, currentVersion, onVersionSelect, isCollapsed
 
   return (
     <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center gap-2 mb-3">
+        <History className="w-4 h-4 text-gray-500" />
         <h3 className="text-sm font-medium text-gray-900">Version History</h3>
-        <History className="w-4 h-4 text-gray-400" />
       </div>
       <div className="space-y-1">
         {versions.map((version) => (
