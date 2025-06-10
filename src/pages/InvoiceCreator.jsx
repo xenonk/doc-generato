@@ -380,25 +380,8 @@ const InvoiceCreator = () => {
   });
 
   // Fetch companies and contracts
-  const { data: companies = [], error: companiesError } = useQuery(
-    'companies',
-    () => documentService.getCompanies(),
-    {
-      onError: (error) => {
-        toast.error(`Failed to load companies: ${error.message}`);
-      }
-    }
-  );
-
-  const { data: contracts = [], error: contractsError } = useQuery(
-    'contracts',
-    () => documentService.getContracts(),
-    {
-      onError: (error) => {
-        toast.error(`Failed to load contracts: ${error.message}`);
-      }
-    }
-  );
+  const { data: companies = [], error: companiesError } = useQuery('companies', () => documentService.getCompanies());
+  const { data: contracts = [], error: contractsError } = useQuery('contracts', () => documentService.getContracts());
 
   // Use mock versions data
   const { data: versions = mockVersions, isLoading: isLoadingVersions } = useQuery(
@@ -430,31 +413,25 @@ const InvoiceCreator = () => {
   }, [invoice, lastSavedState]);
 
   // Save mutations
-  const createMutation = useMutation(
-    (data) => documentService.createInvoice(data),
-    {
-      onSuccess: () => {
-        toast.success('Invoice created successfully');
-        navigate('/dashboard');
-      },
-      onError: (error) => {
-        toast.error(`Failed to create invoice: ${error.message}`);
-      }
+  const createMutation = useMutation((data) => documentService.createInvoice(data), {
+    onSuccess: () => {
+      toast.success('Invoice created successfully');
+      navigate('/dashboard');
+    },
+    onError: (error) => {
+      toast.error(`Failed to create invoice: ${error.message}`);
     }
-  );
+  });
 
-  const updateMutation = useMutation(
-    (data) => documentService.updateInvoice(id, data),
-    {
-      onSuccess: () => {
-        toast.success('Invoice updated successfully');
-        navigate('/dashboard');
-      },
-      onError: (error) => {
-        toast.error(`Failed to update invoice: ${error.message}`);
-      }
+  const updateMutation = useMutation((data) => documentService.updateInvoice(id, data), {
+    onSuccess: () => {
+      toast.success('Invoice updated successfully');
+      navigate('/dashboard');
+    },
+    onError: (error) => {
+      toast.error(`Failed to update invoice: ${error.message}`);
     }
-  );
+  });
 
   // Update save handler to update lastSaved time
   const handleSave = async (type) => {
