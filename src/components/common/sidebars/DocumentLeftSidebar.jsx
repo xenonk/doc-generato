@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Upload, AlertCircle, CheckCircle2, Menu } from 'lucide-react';
 import DocumentWorkspace from '../workspaces/DocumentWorkspace';
 import VersionHistory from '../VersionHistory/VersionHistory';
 import ChangesModal from '../modals/ChangesModal';
@@ -20,7 +20,8 @@ const DocumentLeftSidebar = ({
   onPreview,
   onExport,
   isSaving,
-  lastSaved
+  lastSaved,
+  onLeftSidebarToggle
 }) => {
   const [selectedWorkspaces, setSelectedWorkspaces] = useState([]);
   const [showChangesModal, setShowChangesModal] = useState(false);
@@ -56,9 +57,18 @@ const DocumentLeftSidebar = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Actions at the top */}
-      <div className={`flex-1 ${isCollapsed ? 'px-2' : 'p-6'}`}>
+    <div className="relative flex flex-col h-full">
+      {/* Overlay Hamburger Toggle Button */}
+      <button
+        onClick={onLeftSidebarToggle}
+        className="absolute top-1 left-3 w-10 h-10 flex items-center justify-center p-0 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900 focus:outline-none z-10"
+        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        style={{ minWidth: '40px', minHeight: '40px' }}
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+      {/* Sidebar Content (no Actions title) */}
+      <div className={`flex-1 ${isCollapsed ? 'px-2 pt-12' : 'p-6 pt-12'}`}>
         <div className="mb-6 mt-0">
           <DocumentActions
             onPreview={onPreview}

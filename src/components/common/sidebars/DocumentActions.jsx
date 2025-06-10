@@ -33,10 +33,6 @@ const DocumentActions = ({
 
   return (
     <div className="mb-6">
-      <div className="flex items-center gap-2 mb-3">
-        <Settings className="w-4 h-4 text-gray-500" />
-        <h3 className="text-sm font-medium text-gray-900">Actions</h3>
-      </div>
       <div className="space-y-3">
         {/* Preview Button */}
         <button

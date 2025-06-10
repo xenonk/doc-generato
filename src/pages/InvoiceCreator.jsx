@@ -627,6 +627,7 @@ const InvoiceCreator = () => {
             }}
             isSaving={isCreating || isUpdating}
             lastSaved={lastSaved}
+            onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
           />
       }
       isLeftSidebarCollapsed={isSidebarCollapsed}
