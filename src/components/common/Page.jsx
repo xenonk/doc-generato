@@ -1,6 +1,5 @@
 import React from 'react';
 import Header from '../Header';
-import BaseSidebar from './sidebars/BaseSidebar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Page = ({
@@ -9,19 +8,6 @@ const Page = ({
   
   // Sidebar props
   leftSidebar,
-  rightSidebar,
-  isLeftSidebarCollapsed = false,
-  isRightSidebarCollapsed = false,
-  onLeftSidebarToggle,
-  onRightSidebarToggle,
-  leftSidebarWidth = {
-    expanded: 'w-80',
-    collapsed: 'w-16'
-  },
-  rightSidebarWidth = {
-    expanded: 'w-64',
-    collapsed: 'w-16'
-  },
   
   // Content props
   children,
@@ -41,28 +27,16 @@ const Page = ({
       {showHeader && <Header />}
       
       {/* Main Layout */}
-      <div className="grid grid-cols-[20rem_1fr_16rem] items-stretch w-full">
+      <div className="flex flex-col md:flex-row flex-1 w-full">
         {/* Left Sidebar */}
         {leftSidebar && (
-          <BaseSidebar
-            className=""
-            isCollapsed={isLeftSidebarCollapsed}
-            onToggle={onLeftSidebarToggle}
-            position="left"
-            width={leftSidebarWidth}
-            toggleButtonPosition="top-4"
-            toggleButtonOffset="-right-3"
-            toggleButtonIcon={{
-              expanded: ChevronLeft,
-              collapsed: ChevronRight
-            }}
-          >
+          <aside className="w-full md:w-80 flex-shrink-0 border-r border-gray-200 bg-white">
             {leftSidebar}
-          </BaseSidebar>
+          </aside>
         )}
         
         {/* Main Content */}
-        <div className={`transition-all duration-300 ${contentClassName}`}>
+        <main className="flex-1 min-w-0">
           {/* Breadcrumbs */}
           {showBreadcrumbs && breadcrumbs.length > 0 && (
             <div className="px-6 py-3 border-b border-gray-200 bg-white sticky top-0 z-10">
@@ -98,26 +72,7 @@ const Page = ({
           
           {/* Page Content */}
           {children}
-        </div>
-        
-        {/* Right Sidebar */}
-        {rightSidebar && (
-          <BaseSidebar
-            className=""
-            isCollapsed={isRightSidebarCollapsed}
-            onToggle={onRightSidebarToggle}
-            position="right"
-            width={rightSidebarWidth}
-            toggleButtonPosition="top-4"
-            toggleButtonOffset="-left-3"
-            toggleButtonIcon={{
-              expanded: ChevronRight,
-              collapsed: ChevronLeft
-            }}
-          >
-            {rightSidebar}
-          </BaseSidebar>
-        )}
+        </main>
       </div>
     </div>
   );

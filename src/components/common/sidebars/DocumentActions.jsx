@@ -133,13 +133,6 @@ const DocumentActions = ({
           )}
         </div>
       </div>
-      {/* Last Saved Time */}
-      <div className="border-t border-gray-200 p-4 mt-4">
-        <div className="text-xs text-gray-500">
-          <span>Last saved: </span>
-          <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
-        </div>
-      </div>
     </div>
   );
 };

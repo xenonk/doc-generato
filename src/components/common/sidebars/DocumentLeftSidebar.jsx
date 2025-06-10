@@ -55,6 +55,44 @@ const DocumentLeftSidebar = ({
           onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
           lastSaved={lastSaved}
         />
+        {/* Status and Last Saved Row */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          {/* Status Button */}
+          <div
+            onClick={handleStatusClick}
+            className={`cursor-pointer ${hasUnsavedChanges ? 'hover:bg-gray-50 rounded-lg p-1' : ''}`}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                handleStatusClick(e);
+              }
+            }}
+            title="Click to check status"
+            onMouseEnter={() => !hasUnsavedChanges && setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+          >
+            {hasUnsavedChanges ? (
+              <AlertCircle className="w-7 h-7 text-yellow-500 hover:text-yellow-600 transition-colors" />
+            ) : (
+              <CheckCircle2 className="w-7 h-7 text-green-500" />
+            )}
+            {/* Tooltip */}
+            {showTooltip && !hasUnsavedChanges && (
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50">
+                No unsaved changes
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                  <div className="border-8 border-transparent border-t-gray-900"></div>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Last Saved */}
+          <div className="text-xs text-gray-500 whitespace-nowrap">
+            <span>Last saved: </span>
+            <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
+          </div>
+        </div>
         {/* Import Data */}
         {!isCollapsed && <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>}
         <div className={`border-2 border-dashed border-gray-300 rounded-lg ${isCollapsed ? 'p-2' : 'p-6'} text-center ${isCollapsed ? 'mb-2' : 'mb-6'}`}>
@@ -87,40 +125,6 @@ const DocumentLeftSidebar = ({
           onVersionSelect={onVersionSelect}
           isCollapsed={isCollapsed}
         />
-      </div>
-
-      {/* Status Indicator */}
-      <div className={`border-t border-gray-200 ${isCollapsed ? 'p-2' : 'p-4'}`}>
-        <div 
-          onClick={handleStatusClick}
-          className={`cursor-pointer ${hasUnsavedChanges ? 'hover:bg-gray-50 rounded-lg p-1' : ''}`}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              handleStatusClick(e);
-            }
-          }}
-          title={hasUnsavedChanges ? "Click to view unsaved changes" : "Click to check status"}
-          onMouseEnter={() => !hasUnsavedChanges && setShowTooltip(true)}
-          onMouseLeave={() => setShowTooltip(false)}
-        >
-          {hasUnsavedChanges ? (
-            <AlertCircle className="w-7 h-7 text-yellow-500 hover:text-yellow-600 transition-colors" />
-          ) : (
-            <CheckCircle2 className="w-7 h-7 text-green-500" />
-          )}
-          
-          {/* Tooltip */}
-          {showTooltip && !hasUnsavedChanges && (
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50">
-              No unsaved changes
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                <div className="border-8 border-transparent border-t-gray-900"></div>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Changes Modal */}
