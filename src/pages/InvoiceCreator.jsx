@@ -8,7 +8,7 @@ import DocumentLeftSidebar from '../components/common/sidebars/DocumentLeftSideb
 import { generateDocumentVersions } from '../mocks/documentVersions';
 import { mockWorkspaces } from '../mocks/workspaces';
 import useVersionHistory from '../hooks/useVersionHistory';
-import VersionWarningDialog from '../components/common/modals/VersionWarningDialog';
+import GlobalModal from '../components/common/modals/GlobalModal';
 import Page from '../components/common/Page';
 import DocumentForm from '../components/common/DocumentForm';
 import invoiceSchema from '../schemas/invoiceSchema';
@@ -330,11 +330,27 @@ const Invoice = () => {
           </div>
         )}
       </div>
-      <VersionWarningDialog
+      <GlobalModal
         isOpen={isWarningDialogOpen}
-        onClose={() => setWarningDialogOpen(false)}
-        onConfirm={handleWarningDialogConfirm}
-        onSaveAndGo={handleWarningDialogSaveAndGo}
+        title="Unsaved Changes"
+        message="You have unsaved changes. Would you like to save them before switching versions?"
+        actions={[
+          {
+            label: 'Cancel',
+            onClick: () => setWarningDialogOpen(false),
+            className: 'px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md'
+          },
+          {
+            label: 'Discard Changes',
+            onClick: handleWarningDialogConfirm,
+            className: 'px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md'
+          },
+          {
+            label: 'Save & Switch',
+            onClick: handleWarningDialogSaveAndGo,
+            className: 'px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md'
+          }
+        ]}
       />
     </Page>
   );

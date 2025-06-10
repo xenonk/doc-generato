@@ -10,8 +10,26 @@ export const getChanges = (oldObj, newObj, prefix = '') => {
   const changes = [];
   
   for (const key in newObj) {
-    if (typeof newObj[key] === 'object' && newObj[key] !== null && !Array.isArray(newObj[key])) {
-      changes.push(...getChanges(oldObj[key] || {}, newObj[key], `${prefix}${key}.`));
+    if (Array.isArray(newObj[key])) {
+      const oldArr = oldObj[key] || [];
+      const newArr = newObj[key] || [];
+      if (JSON.stringify(oldArr) !== JSON.stringify(newArr)) {
+        // Try to show a summary for items array
+        if (key === 'items') {
+          changes.push(
+            `${prefix}items changed from ${oldArr.length} item${oldArr.length !== 1 ? 's' : ''} to ${newArr.length} item${newArr.length !== 1 ? 's' : ''}`
+          );
+        } else {
+          changes.push(
+            `${prefix}${key} changed from ${oldArr.length} to ${newArr.length}`
+          );
+        }
+      }
+    } else if (typeof newObj[key] === 'object' && newObj[key] !== null) {
+      // For objects, just say 'changed' if different
+      if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
+        changes.push(`${prefix}${key} changed`);
+      }
     } else if (JSON.stringify(oldObj[key]) !== JSON.stringify(newObj[key])) {
       const fieldName = key.replace(/([A-Z])/g, ' $1').toLowerCase();
       changes.push(`${prefix}${fieldName} changed from "${oldObj[key] || 'empty'}" to "${newObj[key] || 'empty'}"`);
