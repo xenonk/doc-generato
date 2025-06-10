@@ -32,17 +32,12 @@ const DocumentWorkspace = ({
     workspace.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleWorkspaceToggle = (workspace) => {
-    const isSelected = selectedWorkspaces.some(w => w.id === workspace.id);
-    if (isSelected) {
-      onWorkspaceChange(selectedWorkspaces.filter(w => w.id !== workspace.id));
-    } else {
-      onWorkspaceChange([...selectedWorkspaces, workspace]);
-    }
+  const handleWorkspaceSelect = (workspace) => {
+    onWorkspaceChange([workspace]);
   };
 
-  const handleRemoveWorkspace = (workspaceId) => {
-    onWorkspaceChange(selectedWorkspaces.filter(w => w.id !== workspaceId));
+  const handleRemoveWorkspace = () => {
+    onWorkspaceChange([]);
   };
 
   useEffect(() => {
@@ -85,38 +80,35 @@ const DocumentWorkspace = ({
             </div>
             <div className="p-2">
               <div className="flex flex-wrap gap-2 mb-2">
-                {selectedWorkspaces.map(workspace => (
-                  <div
-                    key={workspace.id}
-                    className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm"
-                  >
-                    <span>{workspace.name}</span>
+                {selectedWorkspaces.length > 0 && (
+                  <div className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm">
+                    <span>{selectedWorkspaces[0].name}</span>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveWorkspace(workspace.id);
+                        handleRemoveWorkspace();
                       }}
                       className="hover:text-blue-900"
                     >
                       <X className="w-3 h-3" />
                     </button>
                   </div>
-                ))}
+                )}
               </div>
               <div className="max-h-48 overflow-y-auto">
                 {filteredWorkspaces.map(workspace => (
                   <div
                     key={workspace.id}
-                    onClick={() => handleWorkspaceToggle(workspace)}
+                    onClick={() => handleWorkspaceSelect(workspace)}
                     className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      selectedWorkspaces.some(w => w.id === workspace.id) ? 'bg-blue-50' : ''
+                      selectedWorkspaces.length > 0 && selectedWorkspaces[0].id === workspace.id ? 'bg-blue-50' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-700">{workspace.name}</span>
                       <span className="text-xs text-gray-500">({workspace.documents})</span>
                     </div>
-                    {selectedWorkspaces.some(w => w.id === workspace.id) && (
+                    {selectedWorkspaces.length > 0 && selectedWorkspaces[0].id === workspace.id && (
                       <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                     )}
                   </div>
@@ -142,25 +134,20 @@ const DocumentWorkspace = ({
         >
           <div className="flex flex-wrap gap-2">
             {selectedWorkspaces.length > 0 ? (
-              selectedWorkspaces.map(workspace => (
-                <div
-                  key={workspace.id}
-                  className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm"
+              <div className="flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm">
+                <span>{selectedWorkspaces[0].name}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveWorkspace();
+                  }}
+                  className="hover:text-blue-900"
                 >
-                  <span>{workspace.name}</span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveWorkspace(workspace.id);
-                    }}
-                    className="hover:text-blue-900"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             ) : (
-              <span className="text-gray-500 text-sm">Select workspaces...</span>
+              <span className="text-gray-500 text-sm">Select a workspace...</span>
             )}
           </div>
           <ChevronDown className={`absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
@@ -186,16 +173,16 @@ const DocumentWorkspace = ({
                 filteredWorkspaces.map(workspace => (
                   <div
                     key={workspace.id}
-                    onClick={() => handleWorkspaceToggle(workspace)}
+                    onClick={() => handleWorkspaceSelect(workspace)}
                     className={`flex items-center justify-between px-3 py-2 cursor-pointer hover:bg-gray-50 ${
-                      selectedWorkspaces.some(w => w.id === workspace.id) ? 'bg-blue-50' : ''
+                      selectedWorkspaces.length > 0 && selectedWorkspaces[0].id === workspace.id ? 'bg-blue-50' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-700">{workspace.name}</span>
                       <span className="text-xs text-gray-500">({workspace.documents})</span>
                     </div>
-                    {selectedWorkspaces.some(w => w.id === workspace.id) && (
+                    {selectedWorkspaces.length > 0 && selectedWorkspaces[0].id === workspace.id && (
                       <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                     )}
                   </div>

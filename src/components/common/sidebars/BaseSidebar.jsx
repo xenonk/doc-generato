@@ -8,7 +8,7 @@ const BaseSidebar = ({
   className = '',
   position = 'left', // 'left' or 'right'
   width = {
-    expanded: 'w-64',
+    expanded: 'w-80',
     collapsed: 'w-16'
   },
   toggleButtonPosition = 'top-4',

@@ -15,6 +15,7 @@ import { getChanges } from '../utils/objectUtils';
 import DocumentLeftSidebar from '../components/common/sidebars/DocumentLeftSidebar';
 import DocumentRightSidebar from '../components/common/sidebars/DocumentRightSidebar';
 import { generateDocumentVersions } from '../mocks/documentVersions';
+import { mockWorkspaces } from '../mocks/workspaces';
 import useVersionHistory from '../hooks/useVersionHistory';
 import VersionWarningDialog from '../components/common/modals/VersionWarningDialog';
 import Page from '../components/common/Page';
@@ -341,6 +342,8 @@ const InvoiceForm = ({
 // Move mock data generation outside component
 const mockVersions = generateDocumentVersions('Invoice', 'INV-2024-001');
 
+const defaultSelectedWorkspace = [mockWorkspaces[0]];
+
 const InvoiceCreator = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -628,6 +631,8 @@ const InvoiceCreator = () => {
             isSaving={isCreating || isUpdating}
             lastSaved={lastSaved}
             onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            workspaces={mockWorkspaces}
+            selectedWorkspace={defaultSelectedWorkspace}
           />
       }
       isLeftSidebarCollapsed={isSidebarCollapsed}
