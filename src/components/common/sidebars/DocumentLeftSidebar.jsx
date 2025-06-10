@@ -56,7 +56,7 @@ const DocumentLeftSidebar = ({
           lastSaved={lastSaved}
         />
         {/* Status and Last Saved Row */}
-        <div className="flex items-center justify-between gap-2 mb-4">
+        <div className={`${isCollapsed ? 'flex flex-col items-center text-center gap-1 mb-4' : 'flex items-center justify-between gap-2 mb-4'}`}>
           {/* Status Button */}
           <div
             onClick={handleStatusClick}

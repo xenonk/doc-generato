@@ -40,7 +40,7 @@ const Page = ({
           {/* Sidebar Toggle Button */}
           <button
             onClick={onLeftSidebarToggle}
-            className="absolute top-4 right-[-18px] w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm z-10"
+            className="absolute top-16 right-[-18px] w-7 h-7 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors shadow-sm z-10"
             title={isLeftSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
             {isLeftSidebarCollapsed ? (
