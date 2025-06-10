@@ -171,7 +171,7 @@ export default function Dashboard() {
       onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       showBreadcrumbs={false}
     >
-      <div className="space-y-8 w-full">
+      <div className="p-6 space-y-8 w-full">
         {/* Quick Document Creation */}
         <section>
           <div className="flex items-center justify-between mb-6">
