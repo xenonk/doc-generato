@@ -87,30 +87,31 @@ const DocumentLeftSidebar = ({
             )}
           </div>
           {/* Status Button */}
-          <div
-            onClick={handleStatusClick}
-            className={`cursor-pointer ${hasUnsavedChanges ? 'hover:bg-gray-50 rounded-lg p-1' : ''}`}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                handleStatusClick(e);
-              }
-            }}
-            title="Click to check status"
-            onMouseEnter={() => !hasUnsavedChanges && setShowTooltip(true)}
-            onMouseLeave={() => setShowTooltip(false)}
-          >
-            {hasUnsavedChanges ? (
-              <AlertCircle className="w-7 h-7 text-yellow-500 hover:text-yellow-600 transition-colors" />
-            ) : (
-              <CheckCircle2 className="w-7 h-7 text-green-500" />
-            )}
-            {/* Tooltip */}
+          <div className="relative flex items-center justify-center">
+            <div
+              onClick={handleStatusClick}
+              className={`cursor-pointer ${hasUnsavedChanges ? 'hover:bg-gray-50 rounded-lg p-1' : ''}`}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  handleStatusClick(e);
+                }
+              }}
+              title="Click to check status"
+              onMouseEnter={() => !hasUnsavedChanges && setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+            >
+              {hasUnsavedChanges ? (
+                <AlertCircle className="w-7 h-7 text-yellow-500 hover:text-yellow-600 transition-colors" />
+              ) : (
+                <CheckCircle2 className="w-7 h-7 text-green-500" />
+              )}
+            </div>
             {showTooltip && !hasUnsavedChanges && (
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50">
+              <div className="absolute z-50 left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap">
                 No unsaved changes
-                <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
                   <div className="border-8 border-transparent border-t-gray-900"></div>
                 </div>
               </div>
