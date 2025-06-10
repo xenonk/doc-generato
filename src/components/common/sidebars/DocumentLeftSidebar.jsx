@@ -73,7 +73,32 @@ const DocumentLeftSidebar = ({
             isCollapsed={isCollapsed}
           />
         </div>
-        {/* Status and Last Saved Row */}
+
+        {/* Document Workspace */}
+        <div className={isCollapsed ? 'mb-2' : 'mb-6'}>
+          <DocumentWorkspace
+            selectedWorkspaces={selectedWorkspaces}
+            onWorkspaceChange={setSelectedWorkspaces}
+            isCollapsed={isCollapsed}
+            documentType={documentType}
+          />
+        </div>
+
+        {/* Upload */}
+        <div className={`border-2 border-dashed border-gray-300 rounded-lg ${isCollapsed ? 'p-2' : 'p-6'} text-center ${isCollapsed ? 'mb-2' : 'mb-6'}`}>
+          {isCollapsed ? (
+            <Upload className="w-5 h-5 mx-auto text-gray-400" />
+          ) : (
+            <>
+              <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+              <p className="text-sm text-gray-600">Drop file here or</p>
+              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
+              <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls, .docx, .pdf</p>
+            </>
+          )}
+        </div>
+
+        {/* Last Saved and Status Row */}
         <div className={`${isCollapsed ? 'flex flex-col items-center text-center gap-1 mb-4' : 'flex items-center justify-between gap-2 mb-4'}`}>
           {/* Last Saved */}
           <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1">
@@ -117,29 +142,6 @@ const DocumentLeftSidebar = ({
               </div>
             )}
           </div>
-        </div>
-        {/* Import Data */}
-        <div className={`border-2 border-dashed border-gray-300 rounded-lg ${isCollapsed ? 'p-2' : 'p-6'} text-center ${isCollapsed ? 'mb-2' : 'mb-6'}`}>
-          {isCollapsed ? (
-            <Upload className="w-5 h-5 mx-auto text-gray-400" />
-          ) : (
-            <>
-              <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600">Drop file here or</p>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Browse Files</button>
-              <p className="text-xs text-gray-500 mt-1">Supported: .xlsx, .xls, .docx, .pdf</p>
-            </>
-          )}
-        </div>
-
-        {/* Document Workspace */}
-        <div className={isCollapsed ? 'mb-2' : 'mb-6'}>
-          <DocumentWorkspace
-            selectedWorkspaces={selectedWorkspaces}
-            onWorkspaceChange={setSelectedWorkspaces}
-            isCollapsed={isCollapsed}
-            documentType={documentType}
-          />
         </div>
 
         {/* Version History */}
