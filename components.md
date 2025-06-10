@@ -12,7 +12,6 @@ Definitions:
 2. Header component - contains navigation items (pages), search input, user profile block;
 3. Base sidebar component - consistent sidebar's wrapper component for all sidebars on all app pages. Includes toggle collapsed/opened button component, consistent design;
 4. Left sidebar component - consistent sidebar component for left sidebar on all app pages. Includes params for left sidebar's width and toggle button icon direction on toggles states;
-5. Right sidebar component - consistent sidebar component for right sidebar on all app pages. Includes params for left sidebars' width and toggle button icon direction on toggles states;
 6. Main content component - consistent wrapper layout for all pages in app. Defines responsive bevariour and other generic consistent layout things;
 7. Breadcrumbs component - located at the very top of the main content component. Can be displayed on any page if this option is enabled on the page. Displays the nesting of pages or documents. On the document page, the first element always displays the current document workspace as the first element and current document type as second element;
 
@@ -27,16 +26,14 @@ Definitions:
 
 2. Implementation of document components:
 
-2.1. Left sidebar component:
-1. Upload component;
-2. Document workspace component;
-3. Version History component;
-4. Show changes component;
-
-2.2. Main content component:
-1. Breadcrumbs component
-2. Document component;
-
-2.3. Right sidebar (action bar) component:
+2.1. Left sidebar components:
 1. Document export component;
 2. Save button, that links with version History component and allow to save document;
+3. Upload component;
+4. Document workspace component;
+5. Version History component;
+6. Show changes component;
+
+2.2. Main content components:
+1. Breadcrumbs component
+2. Document component;
