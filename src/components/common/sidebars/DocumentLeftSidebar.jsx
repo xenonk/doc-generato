@@ -40,22 +40,32 @@ const DocumentLeftSidebar = ({
     setShowChangesModal(false);
   };
 
+  // Helper to format time as 24-hour HH:mm
+  const formatTime = (date) => {
+    if (!date) return 'Never';
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Actions at the top */}
       <div className={`flex-1 ${isCollapsed ? 'px-2' : 'p-6'}`}>
-        <DocumentActions
-          onPreview={onPreview}
-          onExport={onExport}
-          onSave={onSave}
-          isSaving={isSaving}
-          showExportDropdown={showExportDropdown}
-          onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
-          showSaveDropdown={showSaveDropdown}
-          onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
-          lastSaved={lastSaved}
-          isCollapsed={isCollapsed}
-        />
+        <div className="mb-6 mt-0">
+          <DocumentActions
+            onPreview={onPreview}
+            onExport={onExport}
+            onSave={onSave}
+            isSaving={isSaving}
+            showExportDropdown={showExportDropdown}
+            onExportDropdownToggle={() => setShowExportDropdown(!showExportDropdown)}
+            showSaveDropdown={showSaveDropdown}
+            onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
+            lastSaved={lastSaved}
+            isCollapsed={isCollapsed}
+          />
+        </div>
         {/* Status and Last Saved Row */}
         <div className={`${isCollapsed ? 'flex flex-col items-center text-center gap-1 mb-4' : 'flex items-center justify-between gap-2 mb-4'}`}>
           {/* Status Button */}
@@ -91,14 +101,11 @@ const DocumentLeftSidebar = ({
           {/* Last Saved */}
           <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1">
             {isCollapsed ? (
-              <>
-                <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
-              </>
+              <span>{formatTime(lastSaved)}</span>
             ) : (
               <>
                 <span>Last saved: </span>
-                <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
+                <span>{formatTime(lastSaved)}</span>
               </>
             )}
           </div>
