@@ -41,11 +41,18 @@ const DocumentLeftSidebar = ({
   };
 
   // Helper to format time as 24-hour HH:mm
-  const formatTime = (date) => {
+  const formatTime = (date, withDate = false) => {
     if (!date) return 'Never';
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    if (!withDate) {
+      return `${hours}:${minutes}`;
+    }
+    const seconds = date.getSeconds().toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear().toString().slice(-2);
+    return `${hours}:${minutes}:${seconds} ${day}.${month}.${year}`;
   };
 
   return (
@@ -68,6 +75,17 @@ const DocumentLeftSidebar = ({
         </div>
         {/* Status and Last Saved Row */}
         <div className={`${isCollapsed ? 'flex flex-col items-center text-center gap-1 mb-4' : 'flex items-center justify-between gap-2 mb-4'}`}>
+          {/* Last Saved */}
+          <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1">
+            {isCollapsed ? (
+               <span>{formatTime(lastSaved)}</span>
+            ) : (
+              <>
+                <span>Last saved: </span>
+                <span>{formatTime(lastSaved, true)}</span>
+              </>
+            )}
+          </div>
           {/* Status Button */}
           <div
             onClick={handleStatusClick}
@@ -96,17 +114,6 @@ const DocumentLeftSidebar = ({
                   <div className="border-8 border-transparent border-t-gray-900"></div>
                 </div>
               </div>
-            )}
-          </div>
-          {/* Last Saved */}
-          <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1">
-            {isCollapsed ? (
-              <span>{formatTime(lastSaved)}</span>
-            ) : (
-              <>
-                <span>Last saved: </span>
-                <span>{formatTime(lastSaved)}</span>
-              </>
             )}
           </div>
         </div>
