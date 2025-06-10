@@ -54,6 +54,7 @@ const DocumentLeftSidebar = ({
           showSaveDropdown={showSaveDropdown}
           onSaveDropdownToggle={() => setShowSaveDropdown(!showSaveDropdown)}
           lastSaved={lastSaved}
+          isCollapsed={isCollapsed}
         />
         {/* Status and Last Saved Row */}
         <div className={`${isCollapsed ? 'flex flex-col items-center text-center gap-1 mb-4' : 'flex items-center justify-between gap-2 mb-4'}`}>
@@ -88,13 +89,21 @@ const DocumentLeftSidebar = ({
             )}
           </div>
           {/* Last Saved */}
-          <div className="text-xs text-gray-500 whitespace-nowrap">
-            <span>Last saved: </span>
-            <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
+          <div className="text-xs text-gray-500 whitespace-nowrap flex items-center gap-1">
+            {isCollapsed ? (
+              <>
+                <svg className="w-4 h-4 inline-block" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
+              </>
+            ) : (
+              <>
+                <span>Last saved: </span>
+                <span>{lastSaved ? lastSaved.toLocaleTimeString() : 'Never'}</span>
+              </>
+            )}
           </div>
         </div>
         {/* Import Data */}
-        {!isCollapsed && <h3 className="text-sm font-medium text-gray-900 mb-3">Import Data</h3>}
         <div className={`border-2 border-dashed border-gray-300 rounded-lg ${isCollapsed ? 'p-2' : 'p-6'} text-center ${isCollapsed ? 'mb-2' : 'mb-6'}`}>
           {isCollapsed ? (
             <Upload className="w-5 h-5 mx-auto text-gray-400" />
@@ -142,4 +151,4 @@ const DocumentLeftSidebar = ({
   );
 };
 
-export default DocumentLeftSidebar; 
+export default DocumentLeftSidebar;

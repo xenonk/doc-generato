@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  ChevronLeft,
   Save,
   Download,
   Printer,
@@ -21,7 +20,8 @@ const DocumentActions = ({
   showSaveDropdown,
   onSaveDropdownToggle,
   status = 'draft',
-  lastSaved
+  lastSaved,
+  isCollapsed
 }) => {
   const formatTime = (date) => {
     if (!date) return '';
@@ -37,24 +37,23 @@ const DocumentActions = ({
         {/* Preview Button */}
         <button
           onClick={onPreview}
-          className="w-full px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center space-x-2"
+          className={`w-full ${isCollapsed ? 'p-2' : 'px-4 py-2'} text-sm text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center space-x-2`}
         >
           <Eye className="w-4 h-4" />
-          <span>Preview</span>
+          {!isCollapsed && <span>Preview</span>}
         </button>
 
         {/* Export Button */}
         <div className="relative">
           <button
             onClick={onExportDropdownToggle}
-            className="w-full bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-green-700"
+            className={`w-full bg-green-600 text-white ${isCollapsed ? 'p-2' : 'px-4 py-2'} rounded-lg flex items-center justify-center space-x-2 hover:bg-green-700`}
           >
             <Download className="w-4 h-4" />
-            <span>Export</span>
-            <ChevronLeft className="w-4 h-4" />
+            {!isCollapsed && <span>Export</span>}
           </button>
           {showExportDropdown && (
-            <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            <div className={`absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50`}>
               <button 
                 onClick={() => { onExport('pdf'); onExportDropdownToggle(); }}
                 className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
@@ -105,11 +104,11 @@ const DocumentActions = ({
         <div className="relative">
           <button
             onClick={onSaveDropdownToggle}
-            className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700"
+            className={`w-full bg-blue-600 text-white ${isCollapsed ? 'p-2' : 'px-4 py-2'} rounded-lg flex items-center justify-center space-x-2 hover:bg-blue-700`}
             disabled={isSaving}
           >
-            <span>{isSaving ? 'Saving...' : 'Save'}</span>
-            <ChevronLeft className="w-4 h-4" />
+            <Save className="w-4 h-4" />
+            {!isCollapsed && <span>{isSaving ? 'Saving...' : 'Save'}</span>}
           </button>
           {showSaveDropdown && (
             <div className="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
