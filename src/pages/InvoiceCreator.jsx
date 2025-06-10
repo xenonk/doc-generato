@@ -639,7 +639,7 @@ const InvoiceCreator = () => {
       onLeftSidebarToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       showBreadcrumbs={true}
       breadcrumbs={[
-        { label: 'Dashboard', href: '/dashboard' },
+        { label: defaultSelectedWorkspace[0].name, href: `/workspaces/${defaultSelectedWorkspace[0].id}` },
         { label: 'Invoices', href: '/documents/invoices' },
         { label: isEditing ? `Edit Invoice ${invoice.number}` : 'New Invoice' }
       ]}
