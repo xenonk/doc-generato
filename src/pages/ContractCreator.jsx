@@ -33,42 +33,10 @@ import BaseSidebar from '../components/common/sidebars/BaseSidebar';
 import DocumentSidebarContent from '../components/common/sidebars/DocumentLeftSidebar';
 import DocumentRightSidebar from '../components/common/sidebars/DocumentRightSidebar';
 import DocumentFormWrapper from '../components/common/DocumentFormWrapper';
-
-// Mock data for companies
-const mockCompanies = [
-  { id: 1, name: 'ABC Corporation', type: 'Customer', country: 'USA', city: 'New York' },
-  { id: 2, name: 'XYZ Ltd', type: 'Supplier', country: 'UK', city: 'London' },
-  { id: 3, name: 'Global Industries', type: 'Partner', country: 'Germany', city: 'Berlin' },
-  { id: 4, name: 'Tech Solutions', type: 'Customer', country: 'Canada', city: 'Toronto' },
-  { id: 5, name: 'Pacific Trading', type: 'Supplier', country: 'Japan', city: 'Tokyo' }
-];
-
-// Mock data for contract types
-const contractTypes = [
-  { id: 'service', name: 'Service Agreement' },
-  { id: 'supply', name: 'Supply Contract' },
-  { id: 'nda', name: 'Non-Disclosure Agreement' },
-  { id: 'partnership', name: 'Partnership Agreement' },
-  { id: 'employment', name: 'Employment Contract' }
-];
-
-// Mock data for currencies
-const currencies = [
-  { code: 'USD', name: 'US Dollar' },
-  { code: 'EUR', name: 'Euro' },
-  { code: 'GBP', name: 'British Pound' },
-  { code: 'JPY', name: 'Japanese Yen' },
-  { code: 'CAD', name: 'Canadian Dollar' }
-];
-
-// Mock data for payment terms
-const paymentTerms = [
-  { id: 'net30', name: 'Net 30' },
-  { id: 'net60', name: 'Net 60' },
-  { id: 'immediate', name: 'Immediate' },
-  { id: 'advance', name: 'Advance Payment' },
-  { id: 'milestone', name: 'Milestone-based' }
-];
+import { mockCompanies, contractTypes, currencies, paymentTerms } from '../mocks/contracts';
+import { generateDocumentVersions } from '../mocks/documentVersions';
+import { mockWorkspaces } from '../mocks/workspaces';
+import { mockCollaborators } from '../mocks/collaborators';
 
 // Default document state
 const defaultDocument = {
@@ -174,39 +142,12 @@ const Contract = () => {
           const data = await documentService.getContract(id);
           setDocument(data);
           setFormData(data);
-          // Mock versions data
-          const mockVersions = [
-            {
-              id: 1,
-              version: '1.0',
-              status: 'draft',
-              date: new Date(),
-              author: 'John Doe',
-              changes: 'Initial version'
-            },
-            {
-              id: 2,
-              version: '1.1',
-              status: 'review',
-              date: new Date(Date.now() - 86400000),
-              author: 'Jane Smith',
-              changes: 'Updated terms and conditions'
-            }
-          ];
+          const mockVersions = generateDocumentVersions('Contract', data.contractNumber || 'CONTRACT-001');
           setVersions(mockVersions);
           setCurrentVersion(mockVersions[0]);
-          // Mock collaborators data
-          setCollaborators([
-            { id: 1, name: 'John Doe', role: 'Author', avatar: 'JD' },
-            { id: 2, name: 'Jane Smith', role: 'Reviewer', avatar: 'JS' }
-          ]);
-          // Mock workspaces data
-          setWorkspaces([
-            { id: 1, name: 'Legal Team', type: 'team' },
-            { id: 2, name: 'Sales Team', type: 'team' },
-            { id: 3, name: 'Personal', type: 'personal' }
-          ]);
-          setSelectedWorkspace({ id: 1, name: 'Legal Team', type: 'team' });
+          setCollaborators(mockCollaborators);
+          setWorkspaces(mockWorkspaces);
+          setSelectedWorkspace(mockWorkspaces[0]);
           setLastSaved(data.lastSaved);
         }
       } catch (err) {
