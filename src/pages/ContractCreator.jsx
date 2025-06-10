@@ -112,7 +112,7 @@ const defaultDocument = {
   lastSaved: null
 };
 
-const ContractCreator = () => {
+const Contract = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditing = Boolean(id);
@@ -764,4 +764,4 @@ const ContractCreator = () => {
   );
 };
 
-export default ContractCreator; 
+export default Contract; 

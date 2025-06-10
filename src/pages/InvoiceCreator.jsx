@@ -344,7 +344,7 @@ const mockVersions = generateDocumentVersions('Invoice', 'INV-2024-001');
 
 const defaultSelectedWorkspace = [mockWorkspaces[0]];
 
-const InvoiceCreator = () => {
+const Invoice = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEditing = !!id;
@@ -664,4 +664,4 @@ const InvoiceCreator = () => {
   );
 };
 
-export default InvoiceCreator; 
+export default Invoice; 
