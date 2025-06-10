@@ -42,10 +42,7 @@ const Invoice = () => {
     },
     bankDetails: '',
     items: [],
-    currency: 'USD',
-    subtotal: 0,
-    tax: 0,
-    total: 0
+    currency: 'USD'
   });
 
   // Fetch companies and contracts
@@ -198,8 +195,7 @@ const Invoice = () => {
       grossWeight: 0,
       netWeight: 0,
       unitPrice: 0,
-      amount: 1,
-      total: 0
+      amount: 1
     };
     setInvoice(prev => ({
       ...prev,
@@ -211,25 +207,13 @@ const Invoice = () => {
     setInvoice(prev => {
       const updatedItems = prev.items.map(item => {
         if (item.id === id) {
-          const updatedItem = { ...item, [field]: value };
-          if (field === 'unitPrice' || field === 'amount') {
-            updatedItem.total = updatedItem.unitPrice * updatedItem.amount;
-          }
-          return updatedItem;
+          return { ...item, [field]: value };
         }
         return item;
       });
-      
-      const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
-      const tax = subtotal * 0.1;
-      const total = subtotal + tax;
-      
       return {
         ...prev,
-        items: updatedItems,
-        subtotal,
-        tax,
-        total
+        items: updatedItems
       };
     });
   };
@@ -237,16 +221,9 @@ const Invoice = () => {
   const removeItem = (id) => {
     setInvoice(prev => {
       const updatedItems = prev.items.filter(item => item.id !== id);
-      const subtotal = updatedItems.reduce((sum, item) => sum + item.total, 0);
-      const tax = subtotal * 0.1;
-      const total = subtotal + tax;
-      
       return {
         ...prev,
-        items: updatedItems,
-        subtotal,
-        tax,
-        total
+        items: updatedItems
       };
     });
   };

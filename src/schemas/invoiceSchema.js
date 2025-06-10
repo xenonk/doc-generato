@@ -110,7 +110,6 @@ const invoiceSchema = [
     ]
   },
   {
-    title: 'Invoice Items',
     fields: [
       {
         name: 'items',
@@ -123,45 +122,8 @@ const invoiceSchema = [
             onAddItem={onAddItem}
             onUpdateItem={onUpdateItem}
             onRemoveItem={onRemoveItem}
+            tableTitle="Invoice Items"
           />
-        )
-      }
-    ]
-  },
-  {
-    title: 'Totals',
-    fields: [
-      {
-        name: 'subtotal',
-        label: 'Subtotal',
-        type: 'custom',
-        render: data => (
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Subtotal:</span>
-            <span className="font-medium">${data.subtotal?.toFixed(2) || '0.00'}</span>
-          </div>
-        )
-      },
-      {
-        name: 'tax',
-        label: 'Tax (10%)',
-        type: 'custom',
-        render: data => (
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Tax (10%):</span>
-            <span className="font-medium">${data.tax?.toFixed(2) || '0.00'}</span>
-          </div>
-        )
-      },
-      {
-        name: 'total',
-        label: 'Total',
-        type: 'custom',
-        render: data => (
-          <div className="flex justify-between border-t border-gray-200 pt-2">
-            <span className="text-lg font-semibold">Total:</span>
-            <span className="text-lg font-semibold">${data.total?.toFixed(2) || '0.00'}</span>
-          </div>
         )
       }
     ]
