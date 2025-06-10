@@ -119,7 +119,14 @@ const invoiceSchema = [
           <DocumentItemsTable
             items={data.items}
             currency={data.currency}
-            onAddItem={onAddItem}
+            onAddItem={() => onAddItem({
+              id: Date.now(),
+              name: '',
+              grossWeight: 0,
+              netWeight: 0,
+              unitPrice: 0,
+              amount: 1
+            })}
             onUpdateItem={onUpdateItem}
             onRemoveItem={onRemoveItem}
             tableTitle="Invoice Items"

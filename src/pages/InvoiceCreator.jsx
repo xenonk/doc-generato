@@ -12,6 +12,8 @@ import GlobalModal from '../components/common/modals/GlobalModal';
 import Page from '../components/common/Page';
 import DocumentForm from '../components/common/DocumentForm';
 import invoiceSchema from '../schemas/invoiceSchema';
+import useNestedFieldChange from '../hooks/useNestedFieldChange';
+import useArrayField from '../hooks/useArrayField';
 
 const mockVersions = generateDocumentVersions('Invoice', 'INV-2024-001');
 const defaultSelectedWorkspace = [mockWorkspaces[0]];
@@ -132,20 +134,7 @@ const Invoice = () => {
     setLastSavedState
   });
 
-  const handleFieldChange = (field, value) => {
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      setInvoice(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value
-        }
-      }));
-    } else {
-      setInvoice(prev => ({ ...prev, [field]: value }));
-    }
-  };
+  const handleFieldChange = useNestedFieldChange(setInvoice);
 
   const handleContractChange = (contractId) => {
     const contract = contracts.find(c => c.id === parseInt(contractId));
@@ -188,45 +177,7 @@ const Invoice = () => {
     }
   };
 
-  const addItem = () => {
-    const newItem = {
-      id: Date.now(),
-      name: '',
-      grossWeight: 0,
-      netWeight: 0,
-      unitPrice: 0,
-      amount: 1
-    };
-    setInvoice(prev => ({
-      ...prev,
-      items: [...prev.items, newItem]
-    }));
-  };
-
-  const updateItem = (id, field, value) => {
-    setInvoice(prev => {
-      const updatedItems = prev.items.map(item => {
-        if (item.id === id) {
-          return { ...item, [field]: value };
-        }
-        return item;
-      });
-      return {
-        ...prev,
-        items: updatedItems
-      };
-    });
-  };
-
-  const removeItem = (id) => {
-    setInvoice(prev => {
-      const updatedItems = prev.items.filter(item => item.id !== id);
-      return {
-        ...prev,
-        items: updatedItems
-      };
-    });
-  };
+  const { addItem, updateItem, removeItem } = useArrayField(setInvoice, 'items');
 
   // Prepare schema with dynamic options
   const preparedSchema = invoiceSchema.map(section => {
