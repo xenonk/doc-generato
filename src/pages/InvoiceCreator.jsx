@@ -79,7 +79,7 @@ const Invoice = () => {
   }, [invoice, lastSavedState]);
 
   // Save mutations
-  const createMutation = useMutation((data) => documentService.createInvoice(data), {
+  const createMutation = useMutation((data) => documentService.createDocument('invoice', data), {
     onSuccess: () => {
       toast.success('Invoice created successfully');
       navigate('/dashboard');
@@ -89,7 +89,7 @@ const Invoice = () => {
     }
   });
 
-  const updateMutation = useMutation((data) => documentService.updateInvoice(id, data), {
+  const updateMutation = useMutation((data) => documentService.updateDocument('invoice', id, data), {
     onSuccess: () => {
       toast.success('Invoice updated successfully');
       navigate('/dashboard');

@@ -195,41 +195,42 @@ export const documentService = {
     }
   },
 
-  // Get invoice
-  async getInvoice(id) {
+  // Generic CRUD for any document type
+  async getDocument(documentType, id) {
     if (USE_MOCK_DATA) {
-      return Promise.resolve(mockInvoices.find(inv => inv.id === Number(id)));
+      const mockMap = {
+        invoice: mockInvoices,
+        contract: mockContracts,
+        // add more as needed
+      };
+      return Promise.resolve(mockMap[documentType]?.find(doc => doc.id === Number(id)));
     }
     try {
-      const response = await directus.items('invoices').readOne(id, {
-        fields: ['*', 'seller.*', 'buyer.*', 'items.*', 'contract.*']
-      });
+      const response = await directus.items(documentType + 's').readOne(id, { fields: ['*', '*.*'] });
       return response;
     } catch (error) {
       throw new Error(handleDirectusError(error));
     }
   },
 
-  // Create invoice
-  async createInvoice(data) {
+  async createDocument(documentType, data) {
     if (USE_MOCK_DATA) {
       return Promise.resolve({ ...data, id: Date.now() });
     }
     try {
-      const response = await directus.items('invoices').createOne(data);
+      const response = await directus.items(documentType + 's').createOne(data);
       return response;
     } catch (error) {
       throw new Error(handleDirectusError(error));
     }
   },
 
-  // Update invoice
-  async updateInvoice(id, data) {
+  async updateDocument(documentType, id, data) {
     if (USE_MOCK_DATA) {
       return Promise.resolve({ ...data, id });
     }
     try {
-      const response = await directus.items('invoices').updateOne(id, data);
+      const response = await directus.items(documentType + 's').updateOne(id, data);
       return response;
     } catch (error) {
       throw new Error(handleDirectusError(error));
