@@ -609,18 +609,18 @@ const InvoiceCreator = () => {
   return (
     <Page
       leftSidebar={
-        <DocumentLeftSidebar
-          isCollapsed={isSidebarCollapsed}
-          documentType="Invoice"
-          versions={versions}
-          currentVersion={lastSavedState}
-          onVersionSelect={handleVersionSelect}
-          hasUnsavedChanges={hasUnsavedChanges}
-          onSave={handleSave}
-          lastSavedState={lastSavedState}
-          document={invoice}
-          onCollaborationClick={() => {/* Handle collaboration click */}}
-        />
+          <DocumentLeftSidebar
+            isCollapsed={isSidebarCollapsed}
+            documentType="Invoice"
+            versions={versions}
+            currentVersion={lastSavedState}
+            onVersionSelect={handleVersionSelect}
+            hasUnsavedChanges={hasUnsavedChanges}
+            onSave={handleSave}
+            lastSavedState={lastSavedState}
+            document={invoice}
+            onCollaborationClick={() => {/* Handle collaboration click */}}
+          />
       }
       rightSidebar={
         <DocumentRightSidebar
@@ -654,37 +654,37 @@ const InvoiceCreator = () => {
       ]}
     >
       <div className="p-6">
-        {error ? (
-          <div className="text-center">
-            <div className="text-red-600 text-xl mb-4">
-              Failed to load data
+              {error ? (
+                <div className="text-center">
+                  <div className="text-red-600 text-xl mb-4">
+                    Failed to load data
+                  </div>
+                  <p className="text-gray-600 mb-4">{error.message}</p>
+                  <button
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Go Back to Dashboard
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full">
+                  <InvoiceForm
+                    invoice={invoice}
+                    companies={companies}
+                    contracts={contracts}
+                    onFieldChange={handleFieldChange}
+                    onContractChange={handleContractChange}
+                    onCompanyChange={handleCompanyChange}
+                    onAddItem={addItem}
+                    onUpdateItem={updateItem}
+                    onRemoveItem={removeItem}
+                    onSave={handleSave}
+                    isSaving={isCreating || isUpdating}
+                  />
+                </div>
+              )}
             </div>
-            <p className="text-gray-600 mb-4">{error.message}</p>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Go Back to Dashboard
-            </button>
-          </div>
-        ) : (
-          <div className="w-full">
-            <InvoiceForm
-              invoice={invoice}
-              companies={companies}
-              contracts={contracts}
-              onFieldChange={handleFieldChange}
-              onContractChange={handleContractChange}
-              onCompanyChange={handleCompanyChange}
-              onAddItem={addItem}
-              onUpdateItem={updateItem}
-              onRemoveItem={removeItem}
-              onSave={handleSave}
-              isSaving={isCreating || isUpdating}
-            />
-          </div>
-        )}
-      </div>
 
       <VersionWarningDialog
         isOpen={isWarningDialogOpen}

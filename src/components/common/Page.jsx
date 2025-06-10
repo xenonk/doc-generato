@@ -36,15 +36,16 @@ const Page = ({
   contentClassName = ''
 }) => {
   return (
-    <div className={`min-h-screen bg-gray-50 ${className}`}>
+    <div className={`min-h-screen flex flex-col bg-gray-50 ${className}`}>
       {/* Header */}
       {showHeader && <Header />}
       
       {/* Main Layout */}
-      <div className={`flex ${fullHeight ? 'h-[calc(100vh-64px)]' : ''}`}>
+      <div className="grid grid-cols-[20rem_1fr_16rem] items-stretch w-full">
         {/* Left Sidebar */}
         {leftSidebar && (
           <BaseSidebar
+            className=""
             isCollapsed={isLeftSidebarCollapsed}
             onToggle={onLeftSidebarToggle}
             position="left"
@@ -61,10 +62,10 @@ const Page = ({
         )}
         
         {/* Main Content */}
-        <div className={`flex-1 transition-all duration-300 ${contentClassName}`}>
+        <div className={`transition-all duration-300 ${contentClassName}`}>
           {/* Breadcrumbs */}
           {showBreadcrumbs && breadcrumbs.length > 0 && (
-            <div className="px-6 py-3 border-b border-gray-200">
+            <div className="px-6 py-3 border-b border-gray-200 bg-white sticky top-0 z-10">
               <nav className="flex" aria-label="Breadcrumb">
                 <ol className="flex items-center space-x-2">
                   {breadcrumbs.map((crumb, index) => (
@@ -102,6 +103,7 @@ const Page = ({
         {/* Right Sidebar */}
         {rightSidebar && (
           <BaseSidebar
+            className=""
             isCollapsed={isRightSidebarCollapsed}
             onToggle={onRightSidebarToggle}
             position="right"
