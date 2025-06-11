@@ -40,7 +40,15 @@ const invoiceSchema = [
         name: 'seller.company',
         label: 'Company',
         type: 'select',
-        getValue: data => data.seller?.company || '',
+        getValue: data => {
+          const company = data.seller?.company;
+          if (!company) return '';
+          // If company is an object (from API), return its ID
+          if (typeof company === 'object') return company.id;
+          // If company is a string (name), find matching company ID
+          const matchingCompany = data.companies?.find(c => c.name === company);
+          return matchingCompany ? matchingCompany.id : '';
+        },
         options: [] // To be filled in InvoiceCreator.jsx
       },
       {
@@ -73,7 +81,15 @@ const invoiceSchema = [
         name: 'buyer.company',
         label: 'Company',
         type: 'select',
-        getValue: data => data.buyer?.company || '',
+        getValue: data => {
+          const company = data.buyer?.company;
+          if (!company) return '';
+          // If company is an object (from API), return its ID
+          if (typeof company === 'object') return company.id;
+          // If company is a string (name), find matching company ID
+          const matchingCompany = data.companies?.find(c => c.name === company);
+          return matchingCompany ? matchingCompany.id : '';
+        },
         options: [] // To be filled in InvoiceCreator.jsx
       },
       {

@@ -13,6 +13,16 @@ const DocumentForm = ({
   onSave,
   isSaving
 }) => {
+  const handleFieldChange = (field, value) => {
+    // If field has a custom onChange handler, use it
+    if (field.onChange) {
+      field.onChange(value);
+    } else {
+      // Otherwise use the default onFieldChange
+      onFieldChange(field.name, value);
+    }
+  };
+
   return (
     <div className="space-y-6 w-full">
       {schema.map((section, idx) => {
@@ -38,7 +48,7 @@ const DocumentForm = ({
                       key={field.name}
                       label={field.label}
                       value={field.getValue(documentData)}
-                      onChange={e => onFieldChange(field.name, e.target.value)}
+                      onChange={e => handleFieldChange(field, e.target.value)}
                       type={field.inputProps?.type || field.type}
                       name={field.name}
                       {...field.inputProps}
@@ -51,7 +61,7 @@ const DocumentForm = ({
                       key={field.name}
                       label={field.label}
                       value={field.getValue(documentData)}
-                      onChange={e => onFieldChange(field.name, e.target.value)}
+                      onChange={e => handleFieldChange(field, e.target.value)}
                       name={field.name}
                       options={field.options || []}
                     />
@@ -63,7 +73,7 @@ const DocumentForm = ({
                       key={field.name}
                       label={field.label}
                       value={field.getValue(documentData)}
-                      onChange={e => onFieldChange(field.name, e.target.value)}
+                      onChange={e => handleFieldChange(field, e.target.value)}
                       name={field.name}
                     />
                   );

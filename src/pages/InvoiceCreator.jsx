@@ -12,8 +12,7 @@ import GlobalModal from '../components/common/modals/GlobalModal';
 import Page from '../components/common/Page';
 import DocumentForm from '../components/common/DocumentForm';
 import invoiceSchema from '../schemas/invoiceSchema';
-import useNestedFieldChange from '../hooks/useNestedFieldChange';
-import useArrayField from '../hooks/useArrayField';
+import useFormFieldChange from '../hooks/useFormFieldChange';
 
 const mockVersions = generateDocumentVersions('Invoice', 'INV-2024-001');
 const defaultSelectedWorkspace = [mockWorkspaces[0]];
@@ -134,59 +133,78 @@ const Invoice = () => {
     setLastSavedState
   });
 
-  const handleFieldChange = useNestedFieldChange(setInvoice);
+  // Configure form field change handlers
+  const { handleFieldChange, handleEntityChange, handleArrayField } = useFormFieldChange(setInvoice, {
+    entities: {
+      company: {
+        data: companies,
+        mapping: (company, prevData) => {
+          // Determine if this is a seller or buyer company based on the field being changed
+          const isSeller = prevData.seller?.company === company.name;
+          const isBuyer = prevData.buyer?.company === company.name;
+          const type = isSeller ? 'seller' : isBuyer ? 'buyer' : company.type;
 
-  const handleContractChange = (contractId) => {
-    const contract = contracts.find(c => c.id === parseInt(contractId));
-    if (contract) {
-      const seller = companies.find(c => c.id === contract.seller_id);
-      const buyer = companies.find(c => c.id === contract.buyer_id);
-      
-      if (seller && buyer) {
-        setInvoice(prev => ({
-          ...prev,
-          seller: {
-            company: seller.name,
-            address: seller.address,
-            director: seller.director,
-            email: seller.email
-          },
-          buyer: {
-            company: buyer.name,
-            address: buyer.address,
-            contactPerson: buyer.director,
-            email: buyer.email
-          }
-        }));
-      }
-    }
-  };
-
-  const handleCompanyChange = (type, companyId) => {
-    const company = companies.find(c => c.id === parseInt(companyId));
-    if (company) {
-      setInvoice(prev => ({
-        ...prev,
-        [type]: {
-          company: company.name,
-          address: company.address,
-          [type === 'seller' ? 'director' : 'contactPerson']: company.director,
-          email: company.email
+          return {
+            [type]: {
+              company: company.name,
+              address: company.address,
+              [type === 'seller' ? 'director' : 'contactPerson']: company.director,
+              email: company.email
+            }
+          };
         }
-      }));
+      },
+      contract: {
+        data: contracts,
+        mapping: (contract) => {
+          const seller = companies.find(c => c.id === contract.seller_id);
+          const buyer = companies.find(c => c.id === contract.buyer_id);
+          
+          return {
+            seller: seller ? {
+              company: seller.name,
+              address: seller.address,
+              director: seller.director,
+              email: seller.email
+            } : {},
+            buyer: buyer ? {
+              company: buyer.name,
+              address: buyer.address,
+              contactPerson: buyer.director,
+              email: buyer.email
+            } : {}
+          };
+        }
+      }
+    },
+    onChange: (newData) => {
+      // Update last saved state to track changes
+      setLastSavedState(prev => {
+        if (!prev) return newData;
+        const changes = getChanges(prev, newData);
+        if (changes.length > 0) {
+          setHasUnsavedChanges(true);
+        }
+        return prev;
+      });
     }
-  };
+  });
 
-  const { addItem, updateItem, removeItem } = useArrayField(setInvoice, 'items');
+  // Get array field handlers for items
+  const { addItem, updateItem, removeItem } = handleArrayField('items');
 
-  // Prepare schema with dynamic options
+  // Prepare schema with dynamic options and handlers
   const preparedSchema = invoiceSchema.map(section => {
     if (section.title === 'Contract') {
       return {
         ...section,
         fields: section.fields.map(field =>
           field.name === 'contract'
-            ? { ...field, options: contracts.map(c => ({ value: c.id, label: c.name })) }
+            ? { 
+                ...field, 
+                options: contracts.map(c => ({ value: c.id, label: c.name })),
+                onChange: (value) => handleEntityChange('contract', value)
+              }
             : field
         )
       };
@@ -194,21 +212,59 @@ const Invoice = () => {
     if (section.title === 'From (Seller)') {
       return {
         ...section,
-        fields: section.fields.map(field =>
-          field.name === 'seller.company'
-            ? { ...field, options: companies.map(c => ({ value: c.id, label: c.name })) }
-            : field
-        )
+        fields: section.fields.map(field => {
+          if (field.name === 'seller.company') {
+            return {
+              ...field,
+              options: companies.map(c => ({ value: c.id, label: c.name })),
+              onChange: (value) => {
+                const selectedCompany = companies.find(c => c.id === parseInt(value));
+                if (selectedCompany) {
+                  setInvoice(prev => ({
+                    ...prev,
+                    seller: {
+                      ...prev.seller,
+                      company: selectedCompany.name,
+                      address: selectedCompany.address,
+                      director: selectedCompany.director,
+                      email: selectedCompany.email
+                    }
+                  }));
+                }
+              }
+            };
+          }
+          return field;
+        })
       };
     }
     if (section.title === 'To (Buyer)') {
       return {
         ...section,
-        fields: section.fields.map(field =>
-          field.name === 'buyer.company'
-            ? { ...field, options: companies.map(c => ({ value: c.id, label: c.name })) }
-            : field
-        )
+        fields: section.fields.map(field => {
+          if (field.name === 'buyer.company') {
+            return {
+              ...field,
+              options: companies.map(c => ({ value: c.id, label: c.name })),
+              onChange: (value) => {
+                const selectedCompany = companies.find(c => c.id === parseInt(value));
+                if (selectedCompany) {
+                  setInvoice(prev => ({
+                    ...prev,
+                    buyer: {
+                      ...prev.buyer,
+                      company: selectedCompany.name,
+                      address: selectedCompany.address,
+                      contactPerson: selectedCompany.director,
+                      email: selectedCompany.email
+                    }
+                  }));
+                }
+              }
+            };
+          }
+          return field;
+        })
       };
     }
     return section;
