@@ -217,24 +217,52 @@ const Invoice = () => {
             return {
               ...field,
               options: companies.map(c => ({ value: c.id, label: c.name })),
+              getValue: (data) => {
+                const company = companies.find(c => c.name === data.seller?.company);
+                return company ? company.id : '';
+              },
               onChange: (value) => {
                 const selectedCompany = companies.find(c => c.id === parseInt(value));
                 if (selectedCompany) {
-                  setInvoice(prev => ({
-                    ...prev,
+                  const updatedInvoice = {
+                    ...invoice,
                     seller: {
-                      ...prev.seller,
+                      ...invoice.seller,
                       company: selectedCompany.name,
-                      address: selectedCompany.address,
-                      director: selectedCompany.director,
-                      email: selectedCompany.email
+                      address: selectedCompany.address || invoice.seller?.address || '',
+                      director: selectedCompany.director || invoice.seller?.director || '',
+                      email: selectedCompany.email || invoice.seller?.email || ''
                     }
-                  }));
+                  };
+                  setInvoice(updatedInvoice);
+                  // Track changes for status
+                  setLastSavedState(prev => {
+                    if (!prev) return updatedInvoice;
+                    const changes = getChanges(prev, updatedInvoice);
+                    if (changes.length > 0) {
+                      setHasUnsavedChanges(true);
+                    }
+                    return prev;
+                  });
                 }
               }
             };
           }
-          return field;
+          return {
+            ...field,
+            onChange: (value) => {
+              handleFieldChange(field.name, value);
+              // Track changes for status
+              setLastSavedState(prev => {
+                if (!prev) return invoice;
+                const changes = getChanges(prev, { ...invoice, [field.name]: value });
+                if (changes.length > 0) {
+                  setHasUnsavedChanges(true);
+                }
+                return prev;
+              });
+            }
+          };
         })
       };
     }
@@ -246,24 +274,52 @@ const Invoice = () => {
             return {
               ...field,
               options: companies.map(c => ({ value: c.id, label: c.name })),
+              getValue: (data) => {
+                const company = companies.find(c => c.name === data.buyer?.company);
+                return company ? company.id : '';
+              },
               onChange: (value) => {
                 const selectedCompany = companies.find(c => c.id === parseInt(value));
                 if (selectedCompany) {
-                  setInvoice(prev => ({
-                    ...prev,
+                  const updatedInvoice = {
+                    ...invoice,
                     buyer: {
-                      ...prev.buyer,
+                      ...invoice.buyer,
                       company: selectedCompany.name,
-                      address: selectedCompany.address,
-                      contactPerson: selectedCompany.director,
-                      email: selectedCompany.email
+                      address: selectedCompany.address || invoice.buyer?.address || '',
+                      contactPerson: selectedCompany.director || invoice.buyer?.contactPerson || '',
+                      email: selectedCompany.email || invoice.buyer?.email || ''
                     }
-                  }));
+                  };
+                  setInvoice(updatedInvoice);
+                  // Track changes for status
+                  setLastSavedState(prev => {
+                    if (!prev) return updatedInvoice;
+                    const changes = getChanges(prev, updatedInvoice);
+                    if (changes.length > 0) {
+                      setHasUnsavedChanges(true);
+                    }
+                    return prev;
+                  });
                 }
               }
             };
           }
-          return field;
+          return {
+            ...field,
+            onChange: (value) => {
+              handleFieldChange(field.name, value);
+              // Track changes for status
+              setLastSavedState(prev => {
+                if (!prev) return invoice;
+                const changes = getChanges(prev, { ...invoice, [field.name]: value });
+                if (changes.length > 0) {
+                  setHasUnsavedChanges(true);
+                }
+                return prev;
+              });
+            }
+          };
         })
       };
     }
